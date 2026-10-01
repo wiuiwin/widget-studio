@@ -74,7 +74,7 @@
   transition: opacity 0.2s;
 }
 .clock-wm:hover { opacity: 1; }
-.clock-wm img { display: block; height: 10px; width: auto; }
+.clock-wm img { display: block; height: 7.5px; width: auto; } /* 'Powered by' 대문자 높이(약 7px)에 맞춤 */
 
 /* 날짜·시간대·라벨 */
 .clock-text {
