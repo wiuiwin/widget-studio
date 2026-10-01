@@ -1,0 +1,237 @@
+/* 시계 위젯 스타일 — 컨테이너 크기에 맞춰 자동으로 커지고 작아진다 (노션 임베드 대응)
+   색 변수: --main(판·문자판) --sub(숫자·바늘) --accent(초침) --text(날짜·라벨) */
+
+.clock-root {
+  box-sizing: border-box;
+  container-type: size;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  align-items: center;
+  justify-items: var(--align, center);
+  overflow: hidden;
+  font-family: var(--font);
+}
+
+.clock-face {
+  font-size: calc(min(96cqw / var(--w), 96cqh / var(--h)) * var(--scale));
+  display: flex;
+  flex-direction: column;
+  align-items: var(--align, center);
+  gap: 0.12em;
+}
+.kind-analog .clock-face { gap: 0.06em; }
+
+.has-shadow .clock-face {
+  filter: drop-shadow(0 0.03em 0.06em rgb(0 0 0 / 0.28));
+}
+
+.clock-row {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-sep {
+  width: 0.35em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.22em;
+}
+.clock-sep i {
+  width: 0.085em;
+  height: 0.085em;
+  border-radius: 50%;
+  background: var(--main);
+}
+
+.clock-ampm {
+  align-self: flex-end;
+  margin-left: 0.12em;
+  font-size: 0.26em;
+  font-weight: 700;
+  padding: 0.25em 0.4em;
+  border-radius: 0.15em;
+  background: var(--main);
+  color: var(--sub);
+  letter-spacing: 0.02em;
+}
+
+/* 날짜·시간대·라벨 */
+.clock-text {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: 0.25em;
+  font-size: var(--tsize);
+  color: var(--text);
+  line-height: 1.2;
+  text-align: center;
+}
+.clock-date { font-weight: 600; }
+.clock-tz { opacity: 0.6; font-size: 0.82em; }
+.clock-label { font-weight: 500; opacity: 0.85; }
+
+/* ── 플립 ─────────────────────────────── */
+.type-flip .fc-card {
+  position: relative;
+  /* 숫자 폭(0.96em)·높이(1.04em) + 안쪽 여백 --ip — 기본값이면 거의 정사각 */
+  /* 최소 폭 = 두 자리 숫자 실측 폭(--dw) — 여백 0 이어도 숫자가 안 잘림 */
+  width: max(var(--dw) * 1.72em + 0.08em, 0.96em + 2 * var(--ip));
+  height: calc(1.04em + 2 * var(--ip));
+  perspective: 4em;
+  border-radius: 0.09em;
+  box-shadow: 0 0.06em 0.12em rgb(0 0 0 / 0.18), 0 0.02em 0.03em rgb(0 0 0 / 0.12);
+}
+.type-flip .fc-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  background: var(--main);
+  color: var(--sub);
+  backface-visibility: hidden;
+}
+.type-flip .fc-half span {
+  display: block;
+  font-size: 0.86em;
+  height: calc((1.04em + 2 * var(--ip)) / 0.86);  /* = 카드 높이 (span 폰트 기준으로 환산) */
+  line-height: calc((1.04em + 2 * var(--ip)) / 0.86);
+  text-align: center;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.type-flip .fc-top {
+  top: 0;
+  border-radius: 0.09em 0.09em 0 0;
+  box-shadow: inset 0 -0.012em 0 rgb(0 0 0 / 0.35); /* 가운데 접히는 선 */
+}
+.type-flip .fc-bottom { bottom: 0; border-radius: 0 0 0.09em 0.09em; }
+.type-flip .fc-bottom span { transform: translateY(-50%); }
+.type-flip .fc-top::after,
+.type-flip .fc-bottom::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.type-flip .fc-top::after { background: linear-gradient(rgb(255 255 255 / 0.05), transparent); }
+.type-flip .fc-bottom::after { background: linear-gradient(rgb(0 0 0 / 0.08), transparent 60%); }
+
+.type-flip .fc-flap.fc-top {
+  transform-origin: bottom;
+  animation: fc-fold 0.28s ease-in forwards;
+  z-index: 2;
+}
+.type-flip .fc-flap.fc-bottom {
+  transform-origin: top;
+  transform: rotateX(90deg);
+  animation: fc-unfold 0.28s ease-out 0.28s forwards;
+  z-index: 2;
+}
+/* 시분 사이 콜론은 작게, PM 은 카드와 간격을 넉넉히 */
+.type-flip .clock-sep { width: 0.3em; gap: 0.2em; }
+.type-flip .clock-sep i { width: 0.075em; height: 0.075em; }
+.type-flip .clock-ampm { margin-left: 0.8em; font-size: 0.24em; } /* 0.8em × 0.24 ≈ 카드 기준 0.19em */
+
+@keyframes fc-fold   { to { transform: rotateX(-90deg); } }
+@keyframes fc-unfold { to { transform: rotateX(0deg); } }
+
+/* ── 디지털 솔리드 ─────────────────────── */
+.type-digital-solid .clock-row {
+  background: var(--main);
+  padding: calc(var(--ip) * 0.8) calc(var(--ip) * 1.7);
+  border-radius: 0.16em;
+}
+.type-digital-solid .clock-digits {
+  width: calc(var(--dw) * 2em + 0.06em);
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--sub);
+}
+.type-digital-solid .clock-sep { width: 0.32em; }
+.type-digital-solid .clock-sep i { background: var(--sub); opacity: 0.85; }
+.type-digital-solid .clock-ampm { background: none; padding: 0 0 0.3em 0.1em; font-size: 0.24em; }
+
+/* 텍스트를 박스 안에 넣을 때: 판을 바깥 래퍼로 옮긴다 */
+.type-digital-solid .solid-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.02em;
+  background: var(--main);
+  padding: calc(var(--ip) * 0.8) calc(var(--ip) * 1.7) calc(var(--ip) * 1.1);
+  border-radius: 0.16em;
+}
+.type-digital-solid.text-inside .clock-row { background: none; padding: 0; }
+.type-digital-solid.text-inside .clock-text { color: var(--sub); }
+
+/* ── 디지털 룰렛 ──────────────────────── */
+.type-digital-roulette .rl-digit {
+  width: calc(var(--dw) * 1em + 0.03em);
+  height: 1.7em;  /* 가운데 1em + 위아래 0.35em 씩 이웃 숫자 */
+  overflow: hidden;
+  color: var(--main);
+  font-weight: 700;
+  /* 가운데 숫자는 선명, 위아래 이웃 숫자는 --peek 불투명도로 비침 */
+  --fade: linear-gradient(
+    rgb(0 0 0 / 0), rgb(0 0 0 / var(--peek)) 0.28em, #000 0.4em,
+    #000 1.3em, rgb(0 0 0 / var(--peek)) 1.42em, rgb(0 0 0 / 0));
+  -webkit-mask-image: var(--fade);
+          mask-image: var(--fade);
+}
+.type-digital-roulette .rl-strip {
+  transform: translateY(calc(0.35em - var(--n, 0) * 1em));
+  transition: transform 0.6s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+.type-digital-roulette .rl-strip span {
+  display: block;
+  height: 1em;
+  line-height: 1em;
+  text-align: center;
+  letter-spacing: -0.04em;
+}
+.type-digital-roulette .clock-sep { width: 0.32em; }
+.type-digital-roulette .clock-ampm { background: none; color: var(--main); padding: 0 0 0.55em 0.1em; }
+
+/* ── 아날로그 공통 ─────────────────────── */
+.analog { position: relative; width: 1em; height: 1em; }
+.analog > svg,
+.analog > .an-trail { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.analog [data-hand] { transform-origin: 100px 100px; }
+.type-analog-dots [data-hand],
+.type-analog-numbers [data-hand],
+.type-analog-tick [data-hand] { transition: transform 0.3s cubic-bezier(0.4, 2.1, 0.55, 1); }
+.analog [data-hand="h"], .analog [data-hand="m"] { transition-duration: 0.5s; }
+
+.an-face   { fill: var(--main); }
+.an-sub    { fill: var(--sub); }
+.an-accent { fill: var(--accent); }
+.an-mark   { fill: var(--sub); stroke: var(--sub); stroke-linecap: round; opacity: 0.9; }
+.an-num {
+  fill: var(--sub);
+  font: 600 19px var(--font);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.hand { stroke-linecap: round; }
+.hand-h { stroke: var(--sub); stroke-width: 7; }
+.hand-m { stroke: var(--sub); stroke-width: 4.5; }
+.hand-s { stroke: var(--accent); stroke-width: 1.8; }
+.orbit { fill: none; stroke: var(--sub); stroke-width: 0.8; opacity: 0.25; }
+
+.type-analog-dots .an-mark { opacity: 0.75; }
+.type-analog-smooth .hand-h, .type-analog-trail .hand-h { stroke-width: 6; }
+
+.an-trail {
+  border-radius: 50%;
+  clip-path: circle(46% at 50% 50%);
+  background: conic-gradient(
+    transparent 0deg 250deg,
+    color-mix(in srgb, var(--accent) 0%, transparent) 250deg,
+    color-mix(in srgb, var(--accent) 45%, transparent) 360deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .type-flip .fc-flap { animation-duration: 0.01s !important; animation-delay: 0s !important; }
+  .rl-strip, .analog [data-hand] { transition: none !important; }
+}
