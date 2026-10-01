@@ -3,138 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>위젯 스튜디오 — 시계</title>
+  <title>위젯 스튜디오</title>
+  <meta name="description" content="노션에 붙이는 위젯. 설정하고, 링크를 복사해서, 노션에 붙이면 끝.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%277%27 fill=%27%231d1d1f%27/%3E%3Cpath d=%27M8 4v4l3 2%27 stroke=%27white%27 stroke-width=%271.6%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-  <link rel="stylesheet" href="css/clock.css?v=8">
-  <link rel="stylesheet" href="css/editor.css?v=8">
+  <link rel="stylesheet" href="css/clock.css?v=9">
+  <link rel="stylesheet" href="css/home.css?v=9">
 </head>
 <body>
-  <aside class="panel">
-    <header class="panel-head">
-      <span class="logo">◷</span>
-      <h1>시계</h1>
-    </header>
+  <header class="top">
+    <a class="brand" href="./">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#1d1d1f"/><path d="M8 4v4l3 2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+      위젯 스튜디오
+    </a>
+  </header>
 
-    <div class="panel-body">
-      <section>
-        <h2>설정</h2>
+  <main>
+    <section class="hero">
+      <h1>노션에 붙이는 위젯</h1>
+      <p>설정하고, 링크를 복사해서, 노션에 붙이면 끝. 로그인 없이 무료예요.</p>
+    </section>
 
-        <label class="field">
-          <span>시계 종류</span>
-          <select data-opt="type"></select>
-        </label>
-
-        <label class="field">
-          <span>시간대</span>
-          <select data-opt="tz">
-            <option value="local">현지 시간대</option>
-            <option value="Asia/Seoul">서울</option>
-            <option value="Asia/Tokyo">도쿄</option>
-            <option value="Asia/Shanghai">베이징</option>
-            <option value="Asia/Singapore">싱가포르</option>
-            <option value="Europe/London">런던</option>
-            <option value="Europe/Paris">파리</option>
-            <option value="America/New_York">뉴욕</option>
-            <option value="America/Los_Angeles">로스앤젤레스</option>
-            <option value="UTC">UTC</option>
-          </select>
-        </label>
-
-        <label class="toggle" data-show="digital"><span>24시간제 사용</span><input type="checkbox" data-opt="h24"><i></i></label>
-        <label class="toggle" data-show="digital"><span>초 표시</span><input type="checkbox" data-opt="seconds"><i></i></label>
-        <label class="toggle" data-show="analog"><span>초침 표시</span><input type="checkbox" data-opt="hand"><i></i></label>
-        <label class="toggle" data-show="analog"><span>시간 눈금 표시</span><input type="checkbox" data-opt="marks"><i></i></label>
-        <label class="toggle"><span>날짜 표시</span><input type="checkbox" data-opt="date"><i></i></label>
-        <label class="toggle"><span>시간대 표시</span><input type="checkbox" data-opt="tzLabel"><i></i></label>
-        <label class="toggle"><span>라벨 추가</span><input type="checkbox" id="label-on"><i></i></label>
-        <input class="text-input" id="label-text" placeholder="예: 서울 사무실" maxlength="40" hidden>
-        <label class="toggle" data-show="solid"><span>텍스트를 박스 안에 넣기</span><input type="checkbox" data-opt="inside"><i></i></label>
-      </section>
-
-      <section>
-        <h2>스타일</h2>
-
-        <div class="field">
-          <span>시계 크기</span>
-          <div class="segmented" data-opt="size">
-            <button value="s">작게</button>
-            <button value="m">보통</button>
-            <button value="l">크게</button>
-            <button value="f">꽉 차게</button>
-          </div>
+    <section class="grid" aria-label="위젯 목록">
+      <a class="card" href="clock/">
+        <div class="preview"><div id="clock-preview"></div></div>
+        <div class="meta">
+          <h2>시계</h2>
+          <p>플립·디지털·아날로그 9종, 폰트 12종, 테마 26종</p>
         </div>
+        <span class="go">만들기 →</span>
+      </a>
 
-        <div class="field" data-show="padded">
-          <span class="field-row"><span id="inpad-label">카드 안쪽 여백</span> <output id="inpad-val"></output></span>
-          <input type="range" class="range" data-opt="inpad" min="0" max="40" step="1">
+      <div class="card soon">
+        <div class="preview"><span class="mock">☀︎ 23°</span></div>
+        <div class="meta">
+          <h2>날씨</h2>
+          <p>기상청 데이터 기반 현재 날씨·예보</p>
         </div>
-
-        <div class="field" data-show="roulette">
-          <span class="field-row">위아래 숫자 보이기 <output id="peek-val"></output></span>
-          <input type="range" class="range" data-opt="peek" min="0" max="100" step="5">
-        </div>
-
-        <div class="field" data-show="flip">
-          <span>정렬</span>
-          <div class="segmented" data-opt="align">
-            <button value="start">왼쪽</button>
-            <button value="center">가운데</button>
-            <button value="end">오른쪽</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <span class="field-row">폰트 <output id="font-name"></output></span>
-          <div class="font-tiles" data-opt="font"></div>
-        </div>
-
-        <label class="toggle"><span>그림자</span><input type="checkbox" data-opt="shadow"><i></i></label>
-        <label class="toggle"><span>워터마크 표시</span><input type="checkbox" data-opt="wm"><i></i></label>
-        <label class="toggle"><span>다크 모드 연동</span><input type="checkbox" data-opt="sync"><i></i></label>
-
-        <div class="field">
-          <span class="field-row">컬러 테마 <output id="theme-name"></output></span>
-          <div class="swatches collapsed" data-opt="theme"></div>
-          <button class="more" id="theme-more" type="button"></button>
-        </div>
-
-        <div class="field colors">
-          <label><span id="c-main">배경판</span><input type="color" data-color="main"></label>
-          <label><span id="c-sub">숫자</span><input type="color" data-color="sub"></label>
-          <label><span>포인트</span><input type="color" data-color="accent"></label>
-          <label><span>텍스트</span><input type="color" data-color="text"></label>
-        </div>
-
-        <div class="field">
-          <span>배경</span>
-          <div class="segmented" data-opt="bg">
-            <button value="transparent">투명</button>
-            <button value="#ffffff">흰색</button>
-            <button value="#191919">노션 다크</button>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <footer class="panel-foot">
-      <h2>링크를 복사해 노션에 붙여넣고 '임베드'를 누르세요</h2>
-      <div class="embed">
-        <input id="embed-url" readonly>
-        <button id="copy" title="링크 복사">복사</button>
+        <span class="badge">준비 중</span>
       </div>
-    </footer>
-  </aside>
 
-  <main class="stage">
-    <p class="hint">💡 오른쪽 아래 모서리를 드래그해서 크기별 모습을 미리 보세요</p>
-    <div class="frame" id="frame">
-      <div id="clock"></div>
-      <span class="frame-size" id="frame-size"></span>
-    </div>
+      <div class="card soon">
+        <div class="preview"><span class="mock">25:00</span></div>
+        <div class="meta">
+          <h2>타이머</h2>
+          <p>뽀모도로·카운트다운</p>
+        </div>
+        <span class="badge">준비 중</span>
+      </div>
+
+      <div class="card soon">
+        <div class="preview"><span class="mock">▲ 1.2%</span></div>
+        <div class="meta">
+          <h2>주식 시세</h2>
+          <p>관심 종목 시세 한눈에</p>
+        </div>
+        <span class="badge">준비 중</span>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>노션에 붙이는 방법</h2>
+      <ol>
+        <li><b>위젯 고르기</b><span>원하는 위젯을 눌러 색·폰트·크기를 설정해요.</span></li>
+        <li><b>링크 복사</b><span>에디터 아래 '복사' 버튼을 눌러요.</span></li>
+        <li><b>노션에 임베드</b><span>노션에서 <code>/임베드</code> → 링크 붙여넣기 → '링크 임베드'.</span></li>
+      </ol>
+    </section>
   </main>
 
-  <script type="module" src="js/editor.js?v=8"></script>
+  <footer class="foot">
+    <span>위젯 스튜디오</span>
+    <span class="by">made by <img src="assets/logo.png" alt="Notionable"></span>
+  </footer>
+
+  <script type="module">
+    import { createClock } from './js/clock.js?v=9';
+    createClock(document.getElementById('clock-preview'), { wm: false, size: 'l' });
+  </script>
 </body>
 </html>
