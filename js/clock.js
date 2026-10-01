@@ -12,7 +12,7 @@ export const DEFAULTS = {
   tzLabel: false,
   label: '',
   inside: false,     // 솔리드: 날짜·시간대·라벨을 박스 안에
-  size: 'm',         // s | m | l
+  size: 'm',         // s | m | l | f(꽉 차게)
   inpad: '18',       // 플립·솔리드: 카드/박스 안쪽 여백 0~40 (숫자 크기 대비 %)
   peek: '40',        // 룰렛: 위아래 숫자 보이는 정도 0~100
   align: 'center',   // left | center | right (플립 전용)
@@ -103,7 +103,7 @@ export function ensureFont(key) {
   document.head.append(link);
 }
 
-const SIZE_SCALE = { s: 0.55, m: 0.75, l: 0.95 };
+const SIZE_SCALE = { s: 0.55, m: 0.75, l: 0.95, f: 1 };
 
 // ── URL 쿼리 <-> 옵션 (임베드 링크용, 기본값과 같은 건 생략) ──
 export function toQuery(opts) {
@@ -441,9 +441,10 @@ export function createClock(root, initial = {}) {
     st.setProperty('--font', fontStack(opts.font));
     st.setProperty('--dw', dw(opts));
     st.setProperty('--ip', `${ip(opts)}em`);
-    st.setProperty('--scale', (SIZE_SCALE[opts.size] || 0.75) * (kind === 'analog' ? 1.15 : 1));
+    // 아날로그는 조금 키우되 박스를 넘지 않게 1 로 제한
+    st.setProperty('--scale', Math.min(1, (SIZE_SCALE[opts.size] || 0.75) * (kind === 'analog' ? 1.15 : 1)));
     st.setProperty('--align', opts.type === 'flip' ? opts.align : 'center');
-    st.padding = '5%';
+    st.padding = opts.size === 'f' ? '0' : '5%';
     st.setProperty('--peek', Math.min(100, Math.max(0, +opts.peek || 0)) / 100 * 0.6);
     st.background = c.bg === 'transparent' ? 'transparent' : c.bg;
 
