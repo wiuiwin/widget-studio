@@ -107,21 +107,21 @@ export function ensureFont(key) {
 const SIZE_SCALE = { s: 0.55, m: 0.75, l: 0.95, f: 1 };
 
 // ── URL 쿼리 <-> 옵션 (임베드 링크용, 기본값과 같은 건 생략) ──
-export function toQuery(opts) {
+export function toQuery(opts, defaults = DEFAULTS) {
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(opts)) {
-    if (k in DEFAULTS && v !== DEFAULTS[k]) q.set(k, typeof v === 'boolean' ? (v ? '1' : '0') : v);
+    if (k in defaults && v !== defaults[k]) q.set(k, typeof v === 'boolean' ? (v ? '1' : '0') : v);
   }
   return q.toString();
 }
 
-export function fromQuery(search) {
+export function fromQuery(search, defaults = DEFAULTS) {
   const q = new URLSearchParams(search);
-  const opts = { ...DEFAULTS };
-  for (const k of Object.keys(DEFAULTS)) {
+  const opts = { ...defaults };
+  for (const k of Object.keys(defaults)) {
     if (!q.has(k)) continue;
     const v = q.get(k);
-    opts[k] = typeof DEFAULTS[k] === 'boolean' ? v === '1' : v;
+    opts[k] = typeof defaults[k] === 'boolean' ? v === '1' : v;
   }
   return opts;
 }
@@ -172,8 +172,17 @@ const el = (tag, cls, html) => {
   return e;
 };
 
-function digitKeys(opts) {
-  return opts.seconds ? ['hh', 'mm', 'ss'] : ['hh', 'mm'];
+// 칸 목록 — 타이머 등은 t._keys 로 직접 넘긴다 (자릿수는 값 길이 그대로: 일수 3자리 등)
+function digitKeys(opts, t) {
+  return t._keys || (opts.seconds ? ['hh', 'mm', 'ss'] : ['hh', 'mm']);
+}
+
+// 단위 라벨(일·시간·분·초)이 있으면 칸을 감싸서 아래에 붙인다
+function withCap(node, t, i) {
+  if (!t._caps) return node;
+  const g = el('div', 'grp');
+  g.append(node, el('div', 'cap', t._caps[i]));
+  return g;
 }
 
 // 안쪽 여백 (em)
@@ -210,19 +219,21 @@ function flipTo(card, value) {
 }
 
 function buildFlip(opts, t) {
-  const keys = digitKeys(opts);
+  const keys = digitKeys(opts, t);
   const row = el('div', 'clock-row');
   const cards = keys.map((k, i) => {
     if (i) row.append(sepEl());
     const c = flipCard(t[k]);
-    row.append(c);
+    c.style.setProperty('--nd', t[k].length);
+    row.append(withCap(c, t, i));
     return c;
   });
   const ampm = el('div', 'clock-ampm', t.ampm);
   if (t.ampm) row.append(ampm);
   return {
     el: row,
-    w: keys.length * Math.max(dw(opts) * 1.72 + 0.08, 0.96 + 2 * ip(opts)) + (keys.length - 1) * 0.3 + (t.ampm ? 0.95 : 0),
+    w: keys.reduce((s, k) => s + Math.max(dw(opts) * 0.86 * t[k].length + 0.08, 0.48 * t[k].length + 2 * ip(opts)), 0)
+      + (keys.length - 1) * 0.3 + (t.ampm ? 0.95 : 0),
     h: 1.04 + 2 * ip(opts),
     tick(t) {
       keys.forEach((k, i) => flipTo(cards[i], t[k]));
@@ -233,19 +244,20 @@ function buildFlip(opts, t) {
 
 // ── 디지털: 솔리드 (한 판 위에 숫자) ──────────────
 function buildSolid(opts, t) {
-  const keys = digitKeys(opts);
+  const keys = digitKeys(opts, t);
   const row = el('div', 'clock-row');
   const cells = keys.map((k, i) => {
     if (i) row.append(sepEl());
     const d = el('div', 'clock-digits', t[k]);
-    row.append(d);
+    d.style.setProperty('--nd', t[k].length);
+    row.append(withCap(d, t, i));
     return d;
   });
   const ampm = el('div', 'clock-ampm', t.ampm);
   if (t.ampm) row.append(ampm);
   return {
     el: row,
-    w: keys.length * (dw(opts) * 2 + 0.06) + (keys.length - 1) * 0.32 + (t.ampm ? 0.7 : 0) + 3.4 * ip(opts),
+    w: keys.reduce((s, k) => s + dw(opts) * t[k].length + 0.06, 0) + (keys.length - 1) * 0.32 + (t.ampm ? 0.7 : 0) + 3.4 * ip(opts),
     h: 1.12 + 1.6 * ip(opts),
     tick(t) {
       keys.forEach((k, i) => { if (cells[i].textContent !== t[k]) cells[i].textContent = t[k]; });
@@ -256,19 +268,21 @@ function buildSolid(opts, t) {
 
 // ── 디지털: 룰렛 (숫자가 세로로 굴러감) ──────────────
 function buildRoulette(opts, t) {
-  const keys = digitKeys(opts);
+  const keys = digitKeys(opts, t);
   const row = el('div', 'clock-row');
   const strips = [];
   keys.forEach((k, i) => {
     if (i) row.append(sepEl());
-    for (let j = 0; j < 2; j++) {
+    const grp = el('div', 'rl-grp');
+    for (let j = 0; j < t[k].length; j++) {
       const strip = el('div', 'rl-strip',
         Array.from({ length: 10 }, (_, n) => `<span>${n}</span>`).join(''));
       const d = el('div', 'rl-digit');
       d.append(strip);
-      row.append(d);
+      grp.append(d);
       strips.push({ k, j, strip });
     }
+    row.append(withCap(grp, t, i));
   });
   const ampm = el('div', 'clock-ampm', t.ampm);
   if (t.ampm) row.append(ampm);
@@ -281,7 +295,7 @@ function buildRoulette(opts, t) {
   tick(t);
   return {
     el: row,
-    w: keys.length * (dw(opts) * 2 + 0.06) + (keys.length - 1) * 0.32 + (t.ampm ? 0.7 : 0),
+    w: keys.reduce((s, k) => s + (dw(opts) + 0.03) * t[k].length, 0) + (keys.length - 1) * 0.32 + (t.ampm ? 0.7 : 0),
     h: 1.7,
     tick,
   };
@@ -438,13 +452,21 @@ function resolveColors(opts) {
   return { main, sub, accent, text, bg };
 }
 
-export function createClock(root, initial = {}) {
+// 칸 구성(키 + 자릿수) — 바뀌면 다시 그린다 (예: 일수 100 → 99)
+const layoutSig = (opts, t) => digitKeys(opts, t).map(k => `${k}${t[k]?.length}`).join() + (t._caps ? '+c' : '');
+
+// src: 시계 대신 시간 값을 공급하는 쪽 (타이머 등)
+//   read(opts) → { _keys, _caps?, ampm, [key]: '05', ... }
+//   extra?(opts) → { el, px, tick?(t) }  시계 아래에 붙는 UI (버튼 등), px 만큼 높이 확보
+export function createClock(root, initial = {}, src = null) {
   let opts = { ...DEFAULTS, ...initial };
-  let clock, textEls = {}, timer = null, raf = null;
+  let clock, textEls = {}, timer = null, raf = null, sig = '', extra = null;
+  const read = () => (src ? src.read(opts) : readNow(opts));
 
   function build() {
     stop();
-    const t = readNow(opts);
+    const t = read();
+    sig = layoutSig(opts, t);
     const kind = TYPES[opts.type]?.kind || 'digital';
     const c = resolveColors(opts);
 
@@ -463,7 +485,8 @@ export function createClock(root, initial = {}) {
     st.setProperty('--align', opts.type === 'flip' ? opts.align : 'center');
     st.padding = opts.size === 'f' ? '0' : '5%';
     // 워터마크(시계 바로 아래, 고정 px) 높이만큼 시계 크기 계산에서 빼 둔다
-    st.setProperty('--wmh', opts.wm ? '24px' : '0px');
+    extra = src?.extra?.(opts) || null;
+    st.setProperty('--wmh', `${(opts.wm ? 24 : 0) + (extra?.px || 0)}px`);
     st.setProperty('--peek', Math.min(100, Math.max(0, +opts.peek || 0)) / 100 * 0.6);
     st.background = c.bg === 'transparent' ? 'transparent' : c.bg;
 
@@ -482,7 +505,8 @@ export function createClock(root, initial = {}) {
     // 가로/세로 중 빡빡한 쪽에 맞춰 글자(em) 크기 결정 — 텍스트 줄 높이 포함
     const lineH = kind === 'analog' ? 0.16 : 0.28;
     st.setProperty('--w', clock.w);
-    st.setProperty('--h', clock.h + (lines ? 0.12 : 0) + lines * lineH);
+    st.setProperty('--h', clock.h + (t._caps ? 0.38 : 0) + (lines ? 0.12 : 0) + lines * lineH);
+    clock.el.classList.toggle('has-caps', !!t._caps);
     st.setProperty('--tsize', kind === 'analog' ? '0.105em' : '0.19em');
 
     const face = el('div', 'clock-face');
@@ -496,6 +520,7 @@ export function createClock(root, initial = {}) {
       face.append(clock.el);
       if (lines) face.append(text);
     }
+    if (extra) face.append(extra.el);
     if (opts.wm) face.append(watermark());
     root.replaceChildren(face);
 
@@ -509,7 +534,10 @@ export function createClock(root, initial = {}) {
   }
 
   function tick() {
-    clock.tick(readNow(opts));
+    const t = read();
+    if (layoutSig(opts, t) !== sig) return build();
+    clock.tick(t);
+    extra?.tick?.(t);
     if (textEls.date) {
       const d = dateText(opts.tz);
       if (textEls.date.textContent !== d) textEls.date.textContent = d;

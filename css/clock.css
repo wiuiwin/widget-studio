@@ -96,7 +96,8 @@
   position: relative;
   /* 숫자 폭(0.96em)·높이(1.04em) + 안쪽 여백 --ip — 기본값이면 거의 정사각 */
   /* 최소 폭 = 두 자리 숫자 실측 폭(--dw) — 여백 0 이어도 숫자가 안 잘림 */
-  width: max(var(--dw) * 1.72em + 0.08em, 0.96em + 2 * var(--ip));
+  /* --nd = 자릿수 (기본 2, 타이머 일수는 3자리도) */
+  width: max(var(--dw) * 0.86em * var(--nd, 2) + 0.08em, 0.48em * var(--nd, 2) + 2 * var(--ip));
   height: calc(1.04em + 2 * var(--ip));
   perspective: 4em;
   border-radius: 0.09em;
@@ -159,7 +160,7 @@
   border-radius: 0.16em;
 }
 .type-digital-solid .clock-digits {
-  width: calc(var(--dw) * 2em + 0.06em);
+  width: calc(var(--dw) * var(--nd, 2) * 1em + 0.06em);
   text-align: center;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -181,6 +182,55 @@
 }
 .type-digital-solid.text-inside .clock-row { background: none; padding: 0; }
 .type-digital-solid.text-inside .clock-text { color: var(--sub); }
+
+/* ── 단위 라벨 (일·시간·분·초) — 칸 아래에 띄워서 가로 배치는 그대로 ── */
+.grp { position: relative; }
+.cap {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 0.9em);   /* 자기 글자(0.15em) 기준 → 시계 기준 약 0.14em 간격 */
+  transform: translateX(-50%);
+  font-size: 0.15em;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text);
+  opacity: 0.7;
+}
+.clock-row.has-caps { margin-bottom: 0.34em; }
+.type-digital-solid .clock-row.has-caps { padding-bottom: calc(var(--ip) * 0.8 + 0.34em); margin-bottom: 0; }
+.type-digital-solid .cap { color: var(--sub); }
+.rl-grp { display: flex; }
+
+/* ── 타이머 추가 UI (뽀모도로 단계·버튼) — 크기는 고정 px ── */
+.tm-extra {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  height: 28px;
+  font: 600 12px/1 'Pretendard', -apple-system, sans-serif;
+}
+.tm-phase {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--main);
+  color: var(--sub);
+}
+.tm-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--main) 12%, transparent);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.tm-btn:hover { background: color-mix(in srgb, var(--main) 22%, transparent); }
+.tm-btn.primary { background: var(--accent); color: #fff; }
 
 /* ── 디지털 룰렛 ──────────────────────── */
 .type-digital-roulette .rl-digit {

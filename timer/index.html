@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>위젯 스튜디오 — 시계</title>
+  <title>위젯 스튜디오 — 타이머</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%277%27 fill=%27%231d1d1f%27/%3E%3Cpath d=%27M8 4v4l3 2%27 stroke=%27white%27 stroke-width=%271.6%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -14,42 +14,44 @@
   <aside class="panel">
     <header class="panel-head">
       <a class="back" href="../" title="홈으로">‹</a>
-      <h1>시계</h1>
+      <h1>타이머</h1>
     </header>
 
     <div class="panel-body">
       <section>
         <h2>설정</h2>
 
+        <div class="field">
+          <span>타이머 종류</span>
+          <div class="segmented" data-opt="mode">
+            <button value="count">카운트다운</button>
+            <button value="pomo">뽀모도로</button>
+          </div>
+        </div>
+
+        <label class="field" data-show="count">
+          <span>목표 날짜·시간</span>
+          <input class="text-input" type="datetime-local" data-opt="target">
+        </label>
+
+        <div class="field" data-show="pomo">
+          <span class="field-row">집중 시간 <output data-for="focus" data-suffix="분"></output></span>
+          <input type="range" class="range" data-opt="focus" min="5" max="90" step="5">
+        </div>
+        <div class="field" data-show="pomo">
+          <span class="field-row">휴식 시간 <output data-for="brk" data-suffix="분"></output></span>
+          <input type="range" class="range" data-opt="brk" min="1" max="30" step="1">
+        </div>
+
         <label class="field">
-          <span>시계 종류</span>
+          <span>디자인</span>
           <select data-opt="type"></select>
         </label>
 
-        <label class="field">
-          <span>시간대</span>
-          <select data-opt="tz">
-            <option value="local">현지 시간대</option>
-            <option value="Asia/Seoul">서울</option>
-            <option value="Asia/Tokyo">도쿄</option>
-            <option value="Asia/Shanghai">베이징</option>
-            <option value="Asia/Singapore">싱가포르</option>
-            <option value="Europe/London">런던</option>
-            <option value="Europe/Paris">파리</option>
-            <option value="America/New_York">뉴욕</option>
-            <option value="America/Los_Angeles">로스앤젤레스</option>
-            <option value="UTC">UTC</option>
-          </select>
-        </label>
-
-        <label class="toggle" data-show="digital"><span>24시간제 사용</span><input type="checkbox" data-opt="h24"><i></i></label>
-        <label class="toggle" data-show="digital"><span>초 표시</span><input type="checkbox" data-opt="seconds"><i></i></label>
-        <label class="toggle" data-show="analog"><span>초침 표시</span><input type="checkbox" data-opt="hand"><i></i></label>
-        <label class="toggle" data-show="analog"><span>시간 눈금 표시</span><input type="checkbox" data-opt="marks"><i></i></label>
-        <label class="toggle"><span>날짜 표시</span><input type="checkbox" data-opt="date"><i></i></label>
-        <label class="toggle"><span>시간대 표시</span><input type="checkbox" data-opt="tzLabel"><i></i></label>
+        <label class="toggle" data-show="count"><span>초 표시</span><input type="checkbox" data-opt="seconds"><i></i></label>
+        <label class="toggle"><span>단위 표시 (일·시간·분·초)</span><input type="checkbox" data-opt="caps"><i></i></label>
         <label class="toggle"><span>라벨 추가</span><input type="checkbox" id="label-on"><i></i></label>
-        <input class="text-input" id="label-text" placeholder="예: 서울 사무실" maxlength="40" hidden>
+        <input class="text-input" id="label-text" placeholder="예: 수능까지, 오늘의 집중" maxlength="40" hidden>
         <label class="toggle" data-show="solid"><span>텍스트를 박스 안에 넣기</span><input type="checkbox" data-opt="inside"><i></i></label>
       </section>
 
@@ -57,7 +59,7 @@
         <h2>스타일</h2>
 
         <div class="field">
-          <span>시계 크기</span>
+          <span>크기</span>
           <div class="segmented" data-opt="size">
             <button value="s">작게</button>
             <button value="m">보통</button>
@@ -137,7 +139,15 @@
 
   <script type="module">
     import { initEditor } from '../js/editor.js?v=11';
-    initEditor();
+    import { createTimer, TIMER_DEFAULTS, TIMER_TYPES, defaultTarget } from '../js/timer.js?v=11';
+    initEditor({
+      widget: 'timer',
+      // 카운트다운 목표는 빈 값이면 '다음 새해' — 에디터에서는 날짜칸에 보이도록 채워 둔다
+      defaults: { ...TIMER_DEFAULTS, target: defaultTarget() },
+      create: (root, opts) => createTimer(root, opts, 'ws-pomo-editor'),
+      types: TIMER_TYPES,
+      visible: o => ({ count: o.mode === 'count', pomo: o.mode === 'pomo' }),
+    });
   </script>
 </body>
 </html>

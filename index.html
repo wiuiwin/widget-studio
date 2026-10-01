@@ -8,8 +8,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%277%27 fill=%27%231d1d1f%27/%3E%3Cpath d=%27M8 4v4l3 2%27 stroke=%27white%27 stroke-width=%271.6%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-  <link rel="stylesheet" href="css/clock.css?v=9">
-  <link rel="stylesheet" href="css/home.css?v=9">
+  <link rel="stylesheet" href="css/clock.css?v=11">
+  <link rel="stylesheet" href="css/home.css?v=11">
 </head>
 <body>
   <header class="top">
@@ -35,6 +35,15 @@
         <span class="go">만들기 →</span>
       </a>
 
+      <a class="card" href="timer/">
+        <div class="preview"><div id="timer-preview" class="live"></div></div>
+        <div class="meta">
+          <h2>타이머</h2>
+          <p>D-day 카운트다운·뽀모도로</p>
+        </div>
+        <span class="go">만들기 →</span>
+      </a>
+
       <div class="card soon">
         <div class="preview"><span class="mock">☀︎ 23°</span></div>
         <div class="meta">
@@ -45,13 +54,32 @@
       </div>
 
       <div class="card soon">
-        <div class="preview"><span class="mock">25:00</span></div>
+        <div class="preview"><span class="mock">PM 18<small>㎍/㎥</small></span></div>
         <div class="meta">
-          <h2>타이머</h2>
-          <p>뽀모도로·카운트다운</p>
+          <h2>미세먼지</h2>
+          <p>미세·초미세먼지 농도와 좋음~매우나쁨 단계</p>
         </div>
         <span class="badge">준비 중</span>
       </div>
+
+      <div class="card soon">
+        <div class="preview"><span class="mock">23.4<small>℃</small></span></div>
+        <div class="meta">
+          <h2>온도</h2>
+          <p>지금 기온과 체감온도, 오늘 최고·최저</p>
+        </div>
+        <span class="badge">준비 중</span>
+      </div>
+
+      <div class="card soon">
+        <div class="preview"><span class="mock">45<small>%</small></span></div>
+        <div class="meta">
+          <h2>습도</h2>
+          <p>현재 습도와 쾌적함 정도</p>
+        </div>
+        <span class="badge">준비 중</span>
+      </div>
+
 
       <div class="card soon">
         <div class="preview"><span class="mock">▲ 1.2%</span></div>
@@ -79,8 +107,10 @@
   </footer>
 
   <script type="module">
-    import { createClock } from './js/clock.js?v=9';
+    import { createClock } from './js/clock.js?v=11';
+    import { createTimer } from './js/timer.js?v=11';
     createClock(document.getElementById('clock-preview'), { wm: false, size: 'l' });
+    createTimer(document.getElementById('timer-preview'), { wm: false, size: 'l', theme: 'sky', main: '#d7ecff', sub: '#1d4e89', text: '#1d4e89', label: '새해까지' });
   </script>
 </body>
 </html>

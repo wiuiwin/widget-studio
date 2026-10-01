@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>시계</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%277%27 fill=%27%231d1d1f%27/%3E%3Cpath d=%27M8 4v4l3 2%27 stroke=%27white%27 stroke-width=%271.6%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
+  <title>타이머</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
   <link rel="stylesheet" href="../css/clock.css?v=11">
@@ -17,8 +16,9 @@
   <!-- 노션 임베드용: 설정은 전부 URL 쿼리로 받는다 -->
   <div id="clock"></div>
   <script type="module">
-    import { createClock, fromQuery } from '../js/clock.js?v=11';
-    createClock(document.getElementById('clock'), fromQuery(location.search));
+    import { createTimer, fromQuery, TIMER_DEFAULTS } from '../js/timer.js?v=11';
+    // 뽀모도로 진행 상태는 위젯 주소마다 따로 저장
+    createTimer(document.getElementById('clock'), fromQuery(location.search, TIMER_DEFAULTS), 'ws-pomo:' + location.search);
   </script>
 </body>
 </html>
