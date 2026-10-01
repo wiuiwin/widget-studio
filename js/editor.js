@@ -1,4 +1,7 @@
-import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, toQuery } from './clock.js';
+import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, toQuery } from './clock.js?v=7';
+
+// 노션에 붙일 공개 주소 (GitHub Pages)
+const PUBLIC_URL = 'https://wiuiwin.github.io/widget-studio/';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -119,7 +122,9 @@ function sync() {
   $('#c-main').textContent = kind === 'analog' ? '문자판' : o.type === 'digital-roulette' ? '숫자' : '배경판';
   $('#c-sub').textContent = kind === 'analog' ? '바늘' : o.type === 'digital-roulette' ? '보조' : '숫자';
 
-  const url = new URL('widgets/clock.html', location.href);
+  // 로컬(localhost)에서 열어도 노션에 붙일 수 있는 공개 주소로 만든다
+  const base = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? PUBLIC_URL : location.href;
+  const url = new URL('widgets/clock.html', base);
   url.search = toQuery(o);
   $('#embed-url').value = url.href;
 }
