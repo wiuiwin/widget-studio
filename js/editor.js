@@ -124,17 +124,31 @@ function sync() {
   $('#embed-url').value = url.href;
 }
 
+// 클립보드 API 가 막힌 환경(앱 내장 브라우저 등)에서는 execCommand 로 복사한다
+function copyBySelection(input) {
+  input.focus();
+  input.setSelectionRange(0, input.value.length);
+  try { return document.execCommand('copy'); } catch { return false; }
+}
+
 $('#copy').addEventListener('click', async () => {
   const btn = $('#copy');
+  const input = $('#embed-url');
+  let ok = false;
   try {
-    await navigator.clipboard.writeText($('#embed-url').value);
-    btn.textContent = '완료';
+    await navigator.clipboard.writeText(input.value);
+    ok = true;
   } catch {
-    $('#embed-url').select();
-    btn.textContent = 'Ctrl+C';
+    ok = copyBySelection(input);
   }
+  // 둘 다 실패하면 전체 선택만 해 두고 직접 복사하도록 안내
+  if (!ok) input.setSelectionRange(0, input.value.length);
+  btn.textContent = ok ? '복사됨' : 'Ctrl+C';
   setTimeout(() => (btn.textContent = '복사'), 1400);
 });
+
+// 주소칸을 누르면 전체 선택 (일부만 잡혀 잘린 주소가 복사되는 것 방지)
+$('#embed-url').addEventListener('focus', e => e.target.select());
 
 // 미리보기 프레임 크기 표시
 new ResizeObserver(([e]) => {
