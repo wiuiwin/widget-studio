@@ -18,6 +18,7 @@ export const DEFAULTS = {
   align: 'center',   // left | center | right (플립 전용)
   font: 'default',   // FONTS 키 — 숫자·날짜·라벨 공통
   shadow: false,
+  wm: true,          // 하단 워터마크
   sync: false,       // 다크모드 연동
   theme: 'dark',
   main: '#1d1d1f',
@@ -408,6 +409,22 @@ const RENDERERS = {
   'digital-roulette': buildRoulette,
 };
 
+// ── 워터마크: 'Powered by' + 로고 이미지 (assets/logo.png — 로고 바뀌면 파일만 교체) ──
+const WM_IMG = new URL('../assets/logo.png', import.meta.url).href;
+const SITE_URL = new URL('../', import.meta.url).href;
+function watermark() {
+  const a = el('a', 'clock-wm');
+  a.href = SITE_URL;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.title = '위젯 만들기';
+  const img = new Image();
+  img.src = WM_IMG;
+  img.alt = 'Notionable';
+  a.append(el('span', null, 'Powered by'), img);
+  return a;
+}
+
 // ── 시계 ──────────────────────────────────────
 const darkMQ = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
 
@@ -445,6 +462,8 @@ export function createClock(root, initial = {}) {
     st.setProperty('--scale', Math.min(1, (SIZE_SCALE[opts.size] || 0.75) * (kind === 'analog' ? 1.15 : 1)));
     st.setProperty('--align', opts.type === 'flip' ? opts.align : 'center');
     st.padding = opts.size === 'f' ? '0' : '5%';
+    // 워터마크(시계 바로 아래, 고정 px) 높이만큼 시계 크기 계산에서 빼 둔다
+    st.setProperty('--wmh', opts.wm ? '30px' : '0px');
     st.setProperty('--peek', Math.min(100, Math.max(0, +opts.peek || 0)) / 100 * 0.6);
     st.background = c.bg === 'transparent' ? 'transparent' : c.bg;
 
@@ -477,6 +496,7 @@ export function createClock(root, initial = {}) {
       face.append(clock.el);
       if (lines) face.append(text);
     }
+    if (opts.wm) face.append(watermark());
     root.replaceChildren(face);
 
     tick();
