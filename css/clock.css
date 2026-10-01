@@ -61,20 +61,20 @@
 
 /* 워터마크 — 시계·텍스트 묶음 바로 아래. 크기는 시계와 무관하게 고정 */
 .clock-wm {
-  margin-top: 12px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
-  gap: 5px;
-  height: 16px;
+  gap: 4px;
+  height: 12px;
   white-space: nowrap;
   text-decoration: none;
-  font: 500 11.5px/1 'Pretendard', -apple-system, sans-serif;
+  font: 400 9.5px/1 'Pretendard', -apple-system, sans-serif;
   color: #8a8a90;
   opacity: 0.85;
   transition: opacity 0.2s;
 }
 .clock-wm:hover { opacity: 1; }
-.clock-wm img { display: block; height: 13px; width: auto; }
+.clock-wm img { display: block; height: 10px; width: auto; }
 
 /* 날짜·시간대·라벨 */
 .clock-text {

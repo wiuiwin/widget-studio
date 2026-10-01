@@ -463,7 +463,7 @@ export function createClock(root, initial = {}) {
     st.setProperty('--align', opts.type === 'flip' ? opts.align : 'center');
     st.padding = opts.size === 'f' ? '0' : '5%';
     // 워터마크(시계 바로 아래, 고정 px) 높이만큼 시계 크기 계산에서 빼 둔다
-    st.setProperty('--wmh', opts.wm ? '30px' : '0px');
+    st.setProperty('--wmh', opts.wm ? '24px' : '0px');
     st.setProperty('--peek', Math.min(100, Math.max(0, +opts.peek || 0)) / 100 * 0.6);
     st.background = c.bg === 'transparent' ? 'transparent' : c.bg;
 
