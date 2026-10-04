@@ -1,0 +1,115 @@
+/* 날씨·온도·습도·미세먼지 위젯 — 시계처럼 박스 크기에 맞춰 커지고 작아진다
+   색: 카드 배경 --main / 카드 위 글자 --sub / 카드 없으면 --text / 아이콘·포인트 --accent */
+
+.wx-root {
+  box-sizing: border-box;
+  container-type: size;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-family: var(--font);
+  color: var(--text);
+}
+
+.wx-face {
+  font-size: calc(min(96cqw / var(--w), (96cqh - var(--wmh, 0px)) / var(--h)) * var(--scale));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.has-shadow .wx-card { filter: drop-shadow(0 0.03em 0.06em rgb(0 0 0 / 0.25)); }
+
+.wx-card {
+  /* 줄바꿈 없이 내용 그대로의 폭 — JS 가 이 크기를 재서 박스에 맞춘다 */
+  width: max-content;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.06em;
+  line-height: 1.2;
+  text-align: center;
+}
+.has-box .wx-card {
+  padding: 0.16em 0.3em 0.18em;
+  border-radius: 0.16em;
+  background: var(--main);
+  color: var(--sub);
+}
+.has-box.has-shadow .wx-card { filter: none; box-shadow: 0 0.04em 0.12em rgb(0 0 0 / 0.18); }
+
+.wx-main { display: flex; align-items: center; gap: 0.1em; line-height: 1; }
+.wx-big {
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.wx-big small { font-size: 0.42em; font-weight: 500; margin-left: 0.04em; letter-spacing: 0; }
+.wx-ic { color: var(--accent); }
+.wx-icon { display: block; width: 0.9em; height: 0.9em; }
+
+.wx-sub { font-size: 0.17em; opacity: 0.85; }
+.wx-sub > div + div { margin-top: 0.2em; }
+.wx-label { font-size: 0.16em; font-weight: 600; opacity: 0.75; margin-top: 0.3em; }
+.wx-msg { font-size: 0.2em; opacity: 0.7; }
+
+/* 3일 예보 */
+.wx-days {
+  display: flex;
+  gap: 0.22em;
+  margin-top: 0.12em;
+  font-size: 0.16em;
+}
+.wx-days > div { display: flex; flex-direction: column; align-items: center; gap: 0.15em; }
+.wx-days .wx-icon { width: 1.8em; height: 1.8em; color: var(--accent); }
+.wx-days b { font-weight: 600; }
+.wx-days i { font-style: normal; opacity: 0.6; }
+
+/* 습도 바 */
+.wx-state { font-weight: 700; opacity: 1; }
+.wx-bar {
+  position: relative;
+  width: 1.8em;
+  height: 0.05em;
+  margin-top: 0.1em;
+  border-radius: 1em;
+  background: linear-gradient(90deg, #f59e0b, #22c55e 40%, #22c55e 60%, #3b82f6);
+  opacity: 0.85;
+}
+.wx-bar i {
+  position: absolute;
+  top: 50%;
+  width: 0.11em;
+  height: 0.11em;
+  border-radius: 50%;
+  background: currentColor;
+  border: 0.02em solid var(--main);
+  transform: translate(-50%, -50%);
+}
+
+/* 미세먼지 */
+.wx-dot { width: 0.32em; height: 0.32em; border-radius: 50%; }
+.wx-grade { letter-spacing: -0.05em; }
+.wx-pms { display: flex; flex-direction: column; gap: 0.06em; margin-top: 0.06em; font-size: 0.17em; }
+.wx-pm { display: flex; align-items: baseline; gap: 0.5em; }
+.wx-pm span { opacity: 0.75; min-width: 4.2em; text-align: right; }
+.wx-pm b { font-weight: 700; min-width: 3em; text-align: left; }
+.wx-pm em { font-style: normal; opacity: 0.75; }
+
+/* 워터마크 (시계와 같은 모양) */
+.wx-root .clock-wm {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 12px;
+  white-space: nowrap;
+  text-decoration: none;
+  font: 400 9.5px/1 'Pretendard', -apple-system, sans-serif;
+  color: #8a8a90;
+  opacity: 0.85;
+}
+.wx-root .clock-wm img { display: block; height: 7.5px; width: auto; }

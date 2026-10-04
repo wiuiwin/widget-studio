@@ -104,7 +104,7 @@ export function ensureFont(key) {
   document.head.append(link);
 }
 
-const SIZE_SCALE = { s: 0.55, m: 0.75, l: 0.95, f: 1 };
+export const SIZE_SCALE = { s: 0.55, m: 0.75, l: 0.95, f: 1 };
 
 // ── URL 쿼리 <-> 옵션 (임베드 링크용, 기본값과 같은 건 생략) ──
 export function toQuery(opts, defaults = DEFAULTS) {
@@ -426,7 +426,7 @@ const RENDERERS = {
 // ── 워터마크: 'Powered by' + 로고 이미지 (assets/logo.png — 로고 바뀌면 파일만 교체) ──
 const WM_IMG = new URL('../assets/logo.png', import.meta.url).href;
 const SITE_URL = new URL('../', import.meta.url).href;
-function watermark() {
+export function watermark() {
   const a = el('a', 'clock-wm');
   a.href = SITE_URL;
   a.target = '_blank';
@@ -442,7 +442,7 @@ function watermark() {
 // ── 시계 ──────────────────────────────────────
 const darkMQ = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
 
-function resolveColors(opts) {
+export function resolveColors(opts) {
   let { main, sub, accent, text, bg } = opts;
   if (opts.sync && darkMQ?.matches) {
     [main, sub] = [sub, main];

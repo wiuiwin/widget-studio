@@ -1,4 +1,4 @@
-import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, toQuery } from './clock.js?v=11';
+import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, toQuery } from './clock.js?v=12';
 
 // 노션에 붙일 공개 주소 (GitHub Pages)
 const PUBLIC_URL = 'https://wiuiwin.github.io/widget-studio/';
@@ -11,9 +11,14 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 // 위젯 에디터 공통 — 시계·타이머 페이지가 같은 패널 구조를 쓴다
 //   defaults: 위젯 기본값 / create(root, opts): 위젯 생성 / widget: 임베드 파일 이름
 //   types: 고를 수 있는 디자인 / visible(o): 페이지 전용 data-show 조건
+//   initial: 처음 열 때 값 (defaults 와 다를 수 있음 — 링크에는 defaults 와 다른 값만 들어간다)
+//   onSync(o, $): 페이지 전용 표시 갱신
+// 반환: { set, options } — 페이지 전용 입력칸을 붙일 때 쓴다
 export function initEditor(cfg = {}) {
   const {
     defaults = DEFAULTS,
+    initial = defaults,
+    onSync = () => {},
     create = (root, opts) => createClock(root, opts),
     widget = 'clock',
     types = Object.keys(TYPES),
@@ -22,7 +27,7 @@ export function initEditor(cfg = {}) {
 
   // 시계 종류 드롭다운 (디지털 / 아날로그 그룹)
   const typeSelect = $('select[data-opt=type]');
-  for (const [kind, name] of [['digital', '디지털'], ['analog', '아날로그']]) {
+  if (typeSelect) for (const [kind, name] of [['digital', '디지털'], ['analog', '아날로그']]) {
     const g = document.createElement('optgroup');
     g.label = name;
     for (const [value, t] of Object.entries(TYPES)) {
@@ -65,7 +70,7 @@ export function initEditor(cfg = {}) {
   }
   moreBtn.addEventListener('click', () => { themesOpen = !themesOpen; renderMore(); });
 
-  const clock = create($('#clock'), defaults);
+  const clock = create($('#clock'), initial);
 
   function set(patch) {
     clock.update(patch);
@@ -115,7 +120,7 @@ export function initEditor(cfg = {}) {
   // 옵션 → 컨트롤 표시 + 임베드 링크
   function sync() {
     const o = clock.options;
-    const kind = TYPES[o.type].kind;
+    const kind = TYPES[o.type]?.kind || 'digital';
 
     $$('select[data-opt]').forEach(el => (el.value = o[el.dataset.opt]));
     $$('input[type=checkbox][data-opt]').forEach(el => (el.checked = o[el.dataset.opt]));
@@ -147,6 +152,7 @@ export function initEditor(cfg = {}) {
     const url = new URL(`widgets/${widget}.html`, base);
     url.search = toQuery(o, defaults);
     $('#embed-url').value = url.href;
+    onSync(o, $);
   }
 
   // 클립보드 API 가 막힌 환경(앱 내장 브라우저 등)에서는 execCommand 로 복사한다
@@ -183,4 +189,5 @@ export function initEditor(cfg = {}) {
 
   renderMore();
   sync();
+  return { set, get options() { return clock.options; } };
 }

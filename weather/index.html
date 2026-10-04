@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>위젯 스튜디오 — 날씨</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%277%27 fill=%27%231d1d1f%27/%3E%3Cpath d=%27M8 4v4l3 2%27 stroke=%27white%27 stroke-width=%271.6%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="../css/clock.css?v=12">
+  <link rel="stylesheet" href="../css/weather.css?v=12">
+  <link rel="stylesheet" href="../css/editor.css?v=12">
+</head>
+<body>
+  <aside class="panel">
+    <header class="panel-head">
+      <a class="back" href="../" title="홈으로">‹</a>
+      <h1 id="page-title">날씨</h1>
+    </header>
+
+    <div class="panel-body">
+      <section>
+        <h2>설정</h2>
+
+        <div class="field">
+          <span>위젯 종류</span>
+          <div class="segmented" data-opt="kind">
+            <button value="weather">날씨</button>
+            <button value="temp">온도</button>
+            <button value="humid">습도</button>
+            <button value="dust">미세먼지</button>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>지역</span>
+          <select data-opt="city" id="city"></select>
+        </label>
+
+        <label class="toggle"><span>지역 이름 표시</span><input type="checkbox" data-opt="place"><i></i></label>
+        <label class="toggle" data-show="hasTemp"><span>최고·최저 기온</span><input type="checkbox" data-opt="range"><i></i></label>
+        <label class="toggle" data-show="hasTemp"><span>체감온도</span><input type="checkbox" data-opt="feels"><i></i></label>
+        <label class="toggle" data-show="isWeather"><span>습도</span><input type="checkbox" data-opt="humid"><i></i></label>
+        <label class="toggle" data-show="isWeather"><span>3일 예보</span><input type="checkbox" data-opt="days"><i></i></label>
+        <label class="toggle" data-show="isDust"><span>초미세먼지도 표시</span><input type="checkbox" data-opt="pm25"><i></i></label>
+        <label class="toggle"><span>라벨 추가</span><input type="checkbox" id="label-on"><i></i></label>
+        <input class="text-input" id="label-text" placeholder="예: 우리 동네 날씨" maxlength="40" hidden>
+        <p class="note" id="src-note"></p>
+      </section>
+
+      <section>
+        <h2>스타일</h2>
+
+        <div class="field">
+          <span>크기</span>
+          <div class="segmented" data-opt="size">
+            <button value="s">작게</button>
+            <button value="m">보통</button>
+            <button value="l">크게</button>
+            <button value="f">꽉 차게</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-row">폰트 <output id="font-name"></output></span>
+          <div class="font-tiles" data-opt="font"></div>
+        </div>
+
+        <label class="toggle"><span>카드 배경</span><input type="checkbox" data-opt="box"><i></i></label>
+        <label class="toggle"><span>그림자</span><input type="checkbox" data-opt="shadow"><i></i></label>
+        <label class="toggle"><span>워터마크 표시</span><input type="checkbox" data-opt="wm"><i></i></label>
+        <label class="toggle"><span>다크 모드 연동</span><input type="checkbox" data-opt="sync"><i></i></label>
+
+        <div class="field">
+          <span class="field-row">컬러 테마 <output id="theme-name"></output></span>
+          <div class="swatches collapsed" data-opt="theme"></div>
+          <button class="more" id="theme-more" type="button"></button>
+        </div>
+
+        <div class="field colors">
+          <label><span id="c-main">배경판</span><input type="color" data-color="main"></label>
+          <label><span id="c-sub">숫자</span><input type="color" data-color="sub"></label>
+          <label><span>포인트</span><input type="color" data-color="accent"></label>
+          <label><span>텍스트</span><input type="color" data-color="text"></label>
+        </div>
+
+        <div class="field">
+          <span>배경</span>
+          <div class="segmented" data-opt="bg">
+            <button value="transparent">투명</button>
+            <button value="#ffffff">흰색</button>
+            <button value="#191919">노션 다크</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="panel-foot">
+      <h2>링크를 복사해 노션에 붙여넣고 '임베드'를 누르세요</h2>
+      <div class="embed">
+        <input id="embed-url" readonly>
+        <button id="copy" title="링크 복사">복사</button>
+      </div>
+    </footer>
+  </aside>
+
+  <main class="stage">
+    <p class="hint">💡 오른쪽 아래 모서리를 드래그해서 크기별 모습을 미리 보세요</p>
+    <div class="frame" id="frame">
+      <div id="clock"></div>
+      <span class="frame-size" id="frame-size"></span>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initEditor } from '../js/editor.js?v=12';
+    import { createWeather, WEATHER_DEFAULTS, KINDS, CITIES } from '../js/weather.js?v=12';
+
+    const city = document.getElementById('city');
+    for (const name of Object.keys(CITIES)) city.append(new Option(name, name));
+
+    // 홈 카드에서 ?kind=temp 처럼 들어오면 그 종류로 시작
+    const kind = new URLSearchParams(location.search).get('kind');
+    initEditor({
+      widget: 'weather',
+      defaults: WEATHER_DEFAULTS,
+      initial: { ...WEATHER_DEFAULTS, ...(kind in KINDS && { kind }) },
+      create: (root, opts) => createWeather(root, opts),
+      visible: o => ({ hasTemp: o.kind === 'weather' || o.kind === 'temp', isWeather: o.kind === 'weather', isDust: o.kind === 'dust' }),
+      onSync(o, $) {
+        $('#page-title').textContent = KINDS[o.kind];
+        document.title = `위젯 스튜디오 — ${KINDS[o.kind]}`;
+        $('#c-main').textContent = '카드';
+        $('#c-sub').textContent = '카드 글자';
+        $('#src-note').textContent = o.kind === 'dust'
+          ? '데이터: Open-Meteo 대기질 모델 (예측값이라 에어코리아 측정소 값과 다를 수 있어요). 15분마다 갱신.'
+          : '데이터: Open-Meteo 날씨 모델. 15분마다 갱신.';
+      },
+    });
+  </script>
+</body>
+</html>

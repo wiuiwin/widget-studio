@@ -3,8 +3,9 @@
 노션에 임베드하는 위젯 만들기 (Indify 참고). 지금은 시계 위젯만 있습니다.
 
 - 홈: `index.html` — 위젯 목록
-- 시계 에디터: `clock/index.html` / 타이머 에디터: `timer/index.html` — 둘 다 `js/editor.js` 의 `initEditor` 공유
-- 임베드: `widgets/clock.html?…`, `widgets/timer.html?…` — 설정은 전부 URL 쿼리로 받음 (노션에 붙은 주소라 경로를 바꾸지 않는다)
+- 에디터: `clock/`, `timer/`, `weather/`(날씨·온도·습도·미세먼지, `?kind=`) — 모두 `js/editor.js` 의 `initEditor` 공유
+- 임베드: `widgets/clock.html?…`, `widgets/timer.html?…`, `widgets/weather.html?…`
+- 날씨 데이터: Open-Meteo (무료·키 없음, 15분 캐시). 미세먼지는 Open-Meteo 대기질 모델(예측값) — 설정은 전부 URL 쿼리로 받음 (노션에 붙은 주소라 경로를 바꾸지 않는다)
 - 순수 HTML/CSS/JS, 빌드 없음
 
 로컬 실행: `py -3.11 -m http.server 5180`
