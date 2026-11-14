@@ -1,7 +1,7 @@
 // 타이머 위젯 — 시계 엔진(createClock)에 '시간 값'만 바꿔 끼운다.
 // 디자인(플립·솔리드·룰렛, 폰트, 테마, 워터마크)은 시계와 같다.
-import { createClock, DEFAULTS as CLOCK_DEFAULTS } from './clock.js?v=13';
-export { fromQuery } from './clock.js?v=13';
+import { createClock, DEFAULTS as CLOCK_DEFAULTS } from './clock.js?v=14';
+export { fromQuery } from './clock.js?v=14';
 
 export const TIMER_DEFAULTS = {
   ...CLOCK_DEFAULTS,
@@ -10,6 +10,7 @@ export const TIMER_DEFAULTS = {
   focus: '25',       // 뽀모도로 집중 (분)
   brk: '5',          // 뽀모도로 휴식 (분)
   caps: true,        // 일·시간·분·초 단위 표시
+  confetti: true,    // 집중 완료 시 폭죽
 };
 
 // 타이머에서 쓰는 디자인만 (아날로그는 제외)
@@ -139,7 +140,7 @@ function pomoSource(root, storeKey) {
         paint();
         if (focusCompleted) {
           focusCompleted = false;
-          celebrate(root);
+          if (opts.confetti) celebrate(root);
         }
       } };
     },
