@@ -1,7 +1,7 @@
 // 날씨·온도·습도·미세먼지 위젯 — 데이터는 Open-Meteo (무료, 키 없음)
 // 디자인 공통 요소(테마·폰트·크기·그림자·다크모드·워터마크)는 시계와 같다.
-import { DEFAULTS as CLOCK_DEFAULTS, ensureFont, fontStack, SIZE_SCALE, watermark, resolveColors } from './clock.js?v=12';
-export { fromQuery } from './clock.js?v=12';
+import { DEFAULTS as CLOCK_DEFAULTS, ensureFont, fontStack, SIZE_SCALE, watermark, resolveColors } from './clock.js?v=13';
+export { fromQuery } from './clock.js?v=13';
 
 export const WEATHER_DEFAULTS = {
   ...CLOCK_DEFAULTS,

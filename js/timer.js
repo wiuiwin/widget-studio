@@ -1,7 +1,7 @@
 // 타이머 위젯 — 시계 엔진(createClock)에 '시간 값'만 바꿔 끼운다.
 // 디자인(플립·솔리드·룰렛, 폰트, 테마, 워터마크)은 시계와 같다.
-import { createClock, DEFAULTS as CLOCK_DEFAULTS } from './clock.js?v=12';
-export { fromQuery } from './clock.js?v=12';
+import { createClock, DEFAULTS as CLOCK_DEFAULTS } from './clock.js?v=13';
+export { fromQuery } from './clock.js?v=13';
 
 export const TIMER_DEFAULTS = {
   ...CLOCK_DEFAULTS,
@@ -37,7 +37,7 @@ function readCountdown(opts) {
 // ── 뽀모도로 (상태는 브라우저에 저장 → 노션 페이지를 다시 열어도 이어짐) ──
 const minutes = (opts, phase) => Math.min(180, Math.max(1, +(phase === 'focus' ? opts.focus : opts.brk) || 1)) * 60000;
 
-function pomoStore(key) {
+function pomoStore(key, onFocusComplete) {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(key)); } catch { /* 저장소 막힘 — 메모리로만 동작 */ }
   const save = () => { try { localStorage.setItem(key, JSON.stringify(s)); } catch { /* 무시 */ } };
@@ -48,11 +48,13 @@ function pomoStore(key) {
       const dur = minutes(opts, s.phase);
       if (!s.running && s.remain === s.total && s.total !== dur) { s.remain = s.total = dur; save(); }
       if (s.running && s.endAt - Date.now() <= 0) {
+        const completedFocus = s.phase === 'focus';
         // 끝나면 다음 단계로 넘어가서 대기
         s.phase = s.phase === 'focus' ? 'break' : 'focus';
         s.running = false;
         s.remain = s.total = minutes(opts, s.phase);
         save();
+        if (completedFocus) onFocusComplete();
       }
       return s;
     },
@@ -71,8 +73,37 @@ function pomoStore(key) {
   };
 }
 
-function pomoSource(storeKey) {
-  const store = pomoStore(storeKey);
+function celebrate(root) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const layer = document.createElement('div');
+  layer.setAttribute('aria-hidden', 'true');
+  layer.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2';
+  root.append(layer);
+
+  const colors = ['#ff5576', '#ffbf36', '#36cfa3', '#4f8dff', '#ab67ff'];
+  const animations = Array.from({ length: 40 }, (_, i) => {
+    const piece = document.createElement('span');
+    piece.style.cssText = 'position:absolute;left:50%;top:50%;width:7px;height:10px;border-radius:2px';
+    piece.style.backgroundColor = colors[i % colors.length];
+    layer.append(piece);
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 0.15 + Math.random() * 0.35;
+    const x = Math.cos(angle) * distance * root.clientWidth;
+    const y = Math.sin(angle) * distance * root.clientHeight;
+    return piece.animate([
+      { transform: 'translate(-50%, -50%) scale(0.4)', opacity: 1 },
+      { transform: `translate(${x}px, ${y}px) rotate(300deg)`, opacity: 1, offset: 0.65 },
+      { transform: `translate(${x * 1.1}px, ${y + 35}px) rotate(540deg)`, opacity: 0 },
+    ], { duration: 750 + Math.random() * 350, easing: 'ease-out' }).finished;
+  });
+  Promise.allSettled(animations).then(() => layer.remove());
+}
+
+function pomoSource(root, storeKey) {
+  let focusCompleted = false;
+  const store = pomoStore(storeKey, () => { focusCompleted = true; });
   return {
     read(opts) {
       store.get(opts);
@@ -104,7 +135,13 @@ function pomoSource(storeKey) {
         play.textContent = s.running ? '❚❚' : '▶';
       };
       paint();
-      return { el: box, px: 38, tick: paint };
+      return { el: box, px: 38, tick() {
+        paint();
+        if (focusCompleted) {
+          focusCompleted = false;
+          celebrate(root);
+        }
+      } };
     },
   };
 }
@@ -114,7 +151,7 @@ const countSource = { read: readCountdown };
 // storeKey: 뽀모도로 진행 상태를 저장할 이름 (위젯 주소마다 따로)
 export function createTimer(root, initial = {}, storeKey = 'ws-pomo') {
   const opts = { ...TIMER_DEFAULTS, ...initial };
-  let api = createClock(root, opts, opts.mode === 'pomo' ? pomoSource(storeKey) : countSource);
+  let api = createClock(root, opts, opts.mode === 'pomo' ? pomoSource(root, storeKey) : countSource);
   // 모드가 바뀌면 시간 공급원도 바꿔야 하므로 새로 만든다
   return {
     get options() { return api.options; },
@@ -122,7 +159,7 @@ export function createTimer(root, initial = {}, storeKey = 'ws-pomo') {
       const o = { ...api.options, ...next };
       if (o.mode !== api.options.mode) {
         api.destroy();
-        api = createClock(root, o, o.mode === 'pomo' ? pomoSource(storeKey) : countSource);
+        api = createClock(root, o, o.mode === 'pomo' ? pomoSource(root, storeKey) : countSource);
       } else {
         api.update(next);
       }
