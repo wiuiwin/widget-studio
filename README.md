@@ -5,7 +5,7 @@
 - 홈: `index.html` — 위젯 목록
 - 에디터: `clock/`, `timer/`, `weather/`(날씨·온도·습도·미세먼지, `?kind=`) — 모두 `js/editor.js` 의 `initEditor` 공유
 - 임베드: `widgets/clock.html?…`, `widgets/timer.html?…`, `widgets/weather.html?…`
-- CD·LP 플레이어: `player/`에서 공개 HTTPS 오디오 파일과 커버를 설정합니다. MP3 자동 커버는 파일 서버가 CORS를 허용하고 지원하는 ID3v2.3/2.4 이미지가 파일 앞부분에 있을 때 표시합니다. 이미지 URL도 직접 지정할 수 있습니다.
+- CD·LP 플레이어: `player/`에서 오디오 파일을 선택해 미리 듣고, GitHub 키를 입력해 공개 저장소의 `media/`에 올린 뒤 노션 링크를 복사합니다. 키는 `widget-studio` 저장소의 Contents 읽기·쓰기 권한만 지정하고, 페이지에 저장하지 않습니다. 최대 20MB이며 MP3 내장 커버 또는 공개 이미지 URL을 사용할 수 있습니다.
 - 날씨 데이터: Open-Meteo (무료·키 없음, 15분 캐시). 미세먼지는 Open-Meteo 대기질 모델(예측값) — 설정은 전부 URL 쿼리로 받음 (노션에 붙은 주소라 경로를 바꾸지 않는다)
 - 순수 HTML/CSS/JS, 빌드 없음
 
