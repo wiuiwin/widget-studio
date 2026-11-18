@@ -7,9 +7,9 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%277%27 fill=%27%231d1d1f%27/%3E%3Cpath d=%27M8 4v4l3 2%27 stroke=%27white%27 stroke-width=%271.6%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-  <link rel="stylesheet" href="../css/clock.css?v=15">
-  <link rel="stylesheet" href="../css/weather.css?v=15">
-  <link rel="stylesheet" href="../css/editor.css?v=15">
+  <link rel="stylesheet" href="../css/clock.css?v=16">
+  <link rel="stylesheet" href="../css/weather.css?v=16">
+  <link rel="stylesheet" href="../css/editor.css?v=16">
 </head>
 <body>
   <aside class="panel">
@@ -41,7 +41,7 @@
         <label class="toggle" data-show="hasTemp"><span>최고·최저 기온</span><input type="checkbox" data-opt="range"><i></i></label>
         <label class="toggle" data-show="hasTemp"><span>체감온도</span><input type="checkbox" data-opt="feels"><i></i></label>
         <label class="toggle" data-show="isWeather"><span>습도</span><input type="checkbox" data-opt="humid"><i></i></label>
-        <label class="toggle" data-show="isWeather"><span>3일 예보</span><input type="checkbox" data-opt="days"><i></i></label>
+        <label class="toggle" data-show="isCard"><span>3일 예보</span><input type="checkbox" data-opt="days"><i></i></label>
         <label class="toggle" data-show="isDust"><span>초미세먼지도 표시</span><input type="checkbox" data-opt="pm25"><i></i></label>
         <label class="toggle"><span>라벨 추가</span><input type="checkbox" id="label-on"><i></i></label>
         <input class="text-input" id="label-text" placeholder="예: 우리 동네 날씨" maxlength="40" hidden>
@@ -50,6 +50,16 @@
 
       <section>
         <h2>스타일</h2>
+
+        <label class="field" data-show="isWeather">
+          <span>날씨 배치</span>
+          <select data-opt="layout">
+            <option value="strip">가로형 · 7일</option>
+            <option value="grid">격자형 · 7일</option>
+            <option value="list">세로형 · 7일</option>
+            <option value="card">기본 카드</option>
+          </select>
+        </label>
 
         <div class="field">
           <span>크기</span>
@@ -113,8 +123,8 @@
   </main>
 
   <script type="module">
-    import { initEditor } from '../js/editor.js?v=15';
-    import { createWeather, WEATHER_DEFAULTS, KINDS, CITIES } from '../js/weather.js?v=15';
+    import { initEditor } from '../js/editor.js?v=16';
+    import { createWeather, WEATHER_DEFAULTS, KINDS, CITIES } from '../js/weather.js?v=16';
 
     const city = document.getElementById('city');
     for (const name of Object.keys(CITIES)) city.append(new Option(name, name));
@@ -124,9 +134,13 @@
     initEditor({
       widget: 'weather',
       defaults: WEATHER_DEFAULTS,
-      initial: { ...WEATHER_DEFAULTS, ...(kind in KINDS && { kind }) },
+      initial: kind in KINDS && kind !== 'weather'
+        ? { ...WEATHER_DEFAULTS, kind }
+        : { ...WEATHER_DEFAULTS, layout: 'strip', size: 'f', range: false,
+          theme: 'custom', main: '#ffffff', sub: '#30363a', text: '#30363a', accent: '#999b9c' },
       create: (root, opts) => createWeather(root, opts),
-      visible: o => ({ hasTemp: o.kind === 'weather' || o.kind === 'temp', isWeather: o.kind === 'weather', isDust: o.kind === 'dust' }),
+      visible: o => ({ hasTemp: o.kind === 'weather' || o.kind === 'temp', isWeather: o.kind === 'weather',
+        isCard: o.kind === 'weather' && o.layout === 'card', isDust: o.kind === 'dust' }),
       onSync(o, $) {
         $('#page-title').textContent = KINDS[o.kind];
         document.title = `위젯 스튜디오 — ${KINDS[o.kind]}`;

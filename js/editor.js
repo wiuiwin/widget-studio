@@ -1,4 +1,4 @@
-import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, fromQuery, toQuery } from './clock.js?v=15';
+import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, fromQuery, toQuery } from './clock.js?v=16';
 
 // 노션에 붙일 공개 주소 (GitHub Pages)
 const PUBLIC_URL = 'https://wiuiwin.github.io/widget-studio/';
@@ -71,7 +71,7 @@ export function initEditor(cfg = {}) {
   moreBtn.addEventListener('click', () => { themesOpen = !themesOpen; renderMore(); });
 
   const params = new URLSearchParams(location.search);
-  const options = params.get('edit') === '1' ? fromQuery(params, initial) : initial;
+  const options = params.get('edit') === '1' ? fromQuery(params, defaults) : initial;
   const clock = create($('#clock'), options);
 
   function set(patch) {

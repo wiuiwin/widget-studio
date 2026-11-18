@@ -1,7 +1,7 @@
 // 날씨·온도·습도·미세먼지 위젯 — 데이터는 Open-Meteo (무료, 키 없음)
 // 디자인 공통 요소(테마·폰트·크기·그림자·다크모드·워터마크)는 시계와 같다.
-import { DEFAULTS as CLOCK_DEFAULTS, ensureFont, fontStack, SIZE_SCALE, watermark, resolveColors } from './clock.js?v=15';
-export { fromQuery } from './clock.js?v=15';
+import { DEFAULTS as CLOCK_DEFAULTS, ensureFont, fontStack, SIZE_SCALE, watermark, resolveColors } from './clock.js?v=16';
+export { fromQuery } from './clock.js?v=16';
 
 export const WEATHER_DEFAULTS = {
   ...CLOCK_DEFAULTS,
@@ -13,6 +13,7 @@ export const WEATHER_DEFAULTS = {
   feels: false,      // 체감온도
   humid: false,      // (날씨) 습도
   days: false,       // (날씨) 3일 예보
+  layout: 'card',    // card | strip | grid | list
   pm25: true,        // (미세먼지) 초미세먼지도 같이
 };
 
@@ -65,8 +66,8 @@ async function loadWeather(opts) {
   // (기상청 KMA 모델 kma_seamless 는 2026-10 기준 값이 비어 와서 기본값 사용)
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&timezone=auto`
     + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,is_day'
-    + '&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3';
-  return cached(`ws-wx:${lat},${lon}`, url);
+    + '&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=8';
+  return cached(`ws-wx-8:${lat},${lon}`, url);
 }
 
 async function loadDust(opts) {
@@ -123,6 +124,20 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 // ── 화면 (em 단위: 1em = 큰 숫자 크기) ──
 function lines(arr) { return arr.filter(Boolean); }
 
+const layouts = ['strip', 'grid', 'list'];
+const weekday = new Intl.DateTimeFormat('ko-KR', { weekday: 'long', timeZone: 'UTC' });
+const temperature = (value, unit = '°') => Number.isFinite(value) ? `${Math.round(value)}${unit}` : '–';
+
+function dailyForecast(day, start, count) {
+  return `<div class="wx-days">${day.time.slice(start, start + count).map((date, index) => {
+    const i = start + index;
+    const dayName = weekday.format(new Date(`${date}T00:00:00Z`));
+    const name = i === 0 ? '오늘' : start === 0 ? dayName[0] : dayName;
+    const [condition, symbol] = sky(day.weather_code[i]);
+    return `<div><span>${name}</span><span class="wx-day-icon" role="img" aria-label="${condition}">${icon(symbol)}</span><b>${temperature(day.temperature_2m_max[i])}</b><i>${temperature(day.temperature_2m_min[i])}</i></div>`;
+  }).join('')}</div>`;
+}
+
 function viewWeather(o, d) {
   const c = d.current, day = d.daily;
   const [label, ic] = sky(c.weather_code, c.is_day);
@@ -131,10 +146,14 @@ function viewWeather(o, d) {
     o.range && `최고 ${r0(day.temperature_2m_max[0])}° · 최저 ${r0(day.temperature_2m_min[0])}°`,
     (o.humid || o.feels) && lines([o.humid && `습도 ${r0(c.relative_humidity_2m)}%`, o.feels && `체감 ${r0(c.apparent_temperature)}°`]).join(' · '),
   ]);
-  const days = o.days ? `<div class="wx-days">${day.time.map((t, i) => {
-    const name = i === 0 ? '오늘' : new Intl.DateTimeFormat('ko-KR', { weekday: 'short' }).format(new Date(t));
-    return `<div><span>${name}</span>${icon(sky(day.weather_code[i])[1])}<b>${r0(day.temperature_2m_max[i])}°</b><i>${r0(day.temperature_2m_min[i])}°</i></div>`;
-  }).join('')}</div>` : '';
+  if (layouts.includes(o.layout)) {
+    const location = o.place ? `<div class="wx-location"><strong>${esc(o.city)}</strong><span>현재 날씨</span></div>` : '';
+    return { html: `<div class="wx-summary">${location}<span class="wx-ic">${icon(ic)}</span>
+      <div><strong class="wx-current">${temperature(c.temperature_2m, ' °C')}</strong><div class="wx-condition">${label}</div></div>
+      ${subs.length > 1 ? `<div class="wx-summary-details">${subs.slice(1).join('<br>')}</div>` : ''}</div>
+      ${dailyForecast(day, 1, 7)}` };
+  }
+  const days = o.days ? dailyForecast(day, 0, 3) : '';
   return {
     html: `<div class="wx-main"><span class="wx-ic">${icon(ic)}</span><span class="wx-big">${r0(c.temperature_2m)}°</span></div>
       <div class="wx-sub">${subs.map(s => `<div>${s}</div>`).join('')}</div>${days}`,
@@ -185,7 +204,8 @@ export function createWeather(root, initial = {}) {
 
   function frame() {
     const c = resolveColors(opts);
-    root.className = `wx-root kind-${opts.kind}${opts.box ? ' has-box' : ''}${opts.shadow ? ' has-shadow' : ''}`;
+    const layout = opts.kind === 'weather' && layouts.includes(opts.layout) ? ` wx-layout-${opts.layout}` : '';
+    root.className = `wx-root kind-${opts.kind}${layout}${opts.box ? ' has-box' : ''}${opts.shadow ? ' has-shadow' : ''}`;
     const st = root.style;
     st.setProperty('--main', c.main);
     st.setProperty('--sub', c.sub);

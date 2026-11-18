@@ -113,3 +113,55 @@
   opacity: 0.85;
 }
 .wx-root .clock-wm img { display: block; height: 7.5px; width: auto; }
+
+/* 7일 예보 배치. 크기는 기존 카드처럼 내용의 실측값으로 맞춘다. */
+.wx-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4em;
+  text-align: center;
+}
+.wx-location, .wx-condition, .wx-summary-details { font-size: .25em; }
+.wx-location { display: grid; gap: .15em; }
+.wx-location span { opacity: .72; }
+.wx-summary .wx-ic { font-size: .63em; }
+.wx-current { display: block; font-size: .42em; font-variant-numeric: tabular-nums; }
+.wx-summary-details { line-height: 1.45; opacity: .76; }
+
+:is(.wx-layout-strip, .wx-layout-grid, .wx-layout-list) .wx-card {
+  padding: .36em .52em;
+  gap: .42em;
+}
+:is(.wx-layout-strip, .wx-layout-grid, .wx-layout-list) .wx-days {
+  margin: 0;
+  font-size: .27em;
+  gap: .5em;
+}
+:is(.wx-layout-strip, .wx-layout-grid, .wx-layout-list) .wx-days > div {
+  min-width: 3.6em;
+  gap: .23em;
+  padding: .32em .36em;
+  font-variant-numeric: tabular-nums;
+}
+:is(.wx-layout-strip, .wx-layout-grid, .wx-layout-list) .wx-days > div > span:first-child { font-weight: 600; }
+:is(.wx-layout-strip, .wx-layout-grid, .wx-layout-list) .wx-days .wx-icon { width: 1.65em; height: 1.65em; }
+
+.wx-layout-strip .wx-card { flex-flow: row wrap; justify-content: center; max-width: max-content; }
+.wx-layout-strip .wx-summary { margin-right: .08em; }
+.wx-layout-strip .wx-label { flex: 1 0 100%; }
+.wx-layout-grid .wx-days { display: grid; grid-template-columns: repeat(4, 1fr); }
+.wx-layout-grid .wx-days > div {
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: .6em;
+}
+.wx-layout-list .wx-summary { flex-wrap: wrap; max-width: 4.4em; }
+.wx-layout-list .wx-summary-details { flex-basis: 100%; }
+.wx-layout-list .wx-days { flex-direction: column; align-self: stretch; gap: 0; }
+.wx-layout-list .wx-days > div {
+  display: grid;
+  grid-template-columns: minmax(3.4em, 1fr) 2em 2.3em 2.3em;
+  justify-items: center;
+  gap: .32em;
+  border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+}

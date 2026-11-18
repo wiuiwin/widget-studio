@@ -8,9 +8,9 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%277%27 fill=%27%231d1d1f%27/%3E%3Cpath d=%27M8 4v4l3 2%27 stroke=%27white%27 stroke-width=%271.6%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-  <link rel="stylesheet" href="css/clock.css?v=15">
-  <link rel="stylesheet" href="css/weather.css?v=15">
-  <link rel="stylesheet" href="css/home.css?v=15">
+  <link rel="stylesheet" href="css/clock.css?v=16">
+  <link rel="stylesheet" href="css/weather.css?v=16">
+  <link rel="stylesheet" href="css/home.css?v=16">
   <link rel="stylesheet" href="css/player.css?v=3">
 </head>
 <body>
@@ -66,7 +66,7 @@
         <div class="preview"><div class="live" data-kind="weather"></div></div>
         <div class="meta">
           <h2>날씨</h2>
-          <p>현재 날씨·최고최저·3일 예보</p>
+          <p>현재 날씨·7일 예보·가로형과 세로형</p>
         </div>
         <span class="go">만들기 →</span>
       </a>
@@ -125,9 +125,9 @@
   </footer>
 
   <script type="module">
-    import { createClock } from './js/clock.js?v=15';
-    import { createTimer } from './js/timer.js?v=15';
-    import { createWeather } from './js/weather.js?v=15';
+    import { createClock } from './js/clock.js?v=16';
+    import { createTimer } from './js/timer.js?v=16';
+    import { createWeather } from './js/weather.js?v=16';
     for (const el of document.querySelectorAll('.live[data-kind]')) createWeather(el, { kind: el.dataset.kind, wm: false, size: 'l' });
     createClock(document.getElementById('clock-preview'), { wm: false, size: 'l' });
     createTimer(document.getElementById('timer-preview'), { wm: false, size: 'l', theme: 'sky', main: '#d7ecff', sub: '#1d4e89', text: '#1d4e89', label: '새해까지' });
