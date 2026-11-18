@@ -6,18 +6,20 @@
   <title>날씨</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-  <link rel="stylesheet" href="../css/weather.css?v=14">
+  <link rel="stylesheet" href="../css/weather.css?v=15">
   <style>
     html, body { height: 100%; margin: 0; background: transparent; }
     #w { position: fixed; inset: 0; }
   </style>
+  <link rel="stylesheet" href="../css/widget-edit.css?v=1">
 </head>
 <body>
   <!-- 노션 임베드용: 설정은 전부 URL 쿼리로 받는다 -->
   <div id="w"></div>
   <script type="module">
-    import { createWeather, fromQuery, WEATHER_DEFAULTS } from '../js/weather.js?v=14';
+    import { createWeather, fromQuery, WEATHER_DEFAULTS } from '../js/weather.js?v=15';
     createWeather(document.getElementById('w'), fromQuery(location.search, WEATHER_DEFAULTS));
   </script>
+  <script src="../js/widget-edit.js?v=1" data-editor="weather"></script>
 </body>
 </html>

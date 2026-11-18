@@ -1,7 +1,7 @@
 // 타이머 위젯 — 시계 엔진(createClock)에 '시간 값'만 바꿔 끼운다.
 // 디자인(플립·솔리드·룰렛, 폰트, 테마, 워터마크)은 시계와 같다.
-import { createClock, DEFAULTS as CLOCK_DEFAULTS } from './clock.js?v=14';
-export { fromQuery } from './clock.js?v=14';
+import { createClock, DEFAULTS as CLOCK_DEFAULTS } from './clock.js?v=15';
+export { fromQuery } from './clock.js?v=15';
 
 export const TIMER_DEFAULTS = {
   ...CLOCK_DEFAULTS,

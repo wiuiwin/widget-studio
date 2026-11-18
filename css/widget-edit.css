@@ -1,0 +1,18 @@
+.widget-edit {
+  position: fixed;
+  z-index: 20;
+  top: 6px;
+  right: 6px;
+  padding: 5px 9px;
+  border: 1px solid #655e5233;
+  border-radius: 99px;
+  background: #faf8f1;
+  color: #282521;
+  box-shadow: 0 2px 5px #0002;
+  font: 600 11px/1.25 system-ui, sans-serif;
+  text-decoration: none;
+}
+@media (hover: hover) {
+  .widget-edit { opacity: 0; transition: opacity 120ms ease; }
+  body:hover .widget-edit, .widget-edit:focus-visible { opacity: 1; }
+}

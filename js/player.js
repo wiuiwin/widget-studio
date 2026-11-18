@@ -13,7 +13,7 @@ deck.dataset.type = params.get('type') === 'cd' ? 'cd' : 'lp';
 function mediaURL(name) {
   try {
     const url = new URL(params.get(name));
-    if (name === 'audio' && url.protocol === 'blob:' && url.origin === location.origin) return url.href;
+    if (params.get('preview') === '1' && url.protocol === 'blob:' && url.origin === location.origin) return url.href;
     if (url.protocol === 'https:' && !url.username && !url.password) return url.href;
   } catch { /* 미리보기에 파일이 아직 없음 */ }
   return '';

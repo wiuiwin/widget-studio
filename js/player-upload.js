@@ -12,10 +12,11 @@ function encodeFile(file) {
   });
 }
 
-export async function publishAudio(file, token, onStatus) {
-  const extension = file.name.match(extensions)?.[0].toLowerCase();
-  if (!extension || !file.size || file.size > maxBytes) {
-    throw new Error('지원하는 오디오 파일을 선택해 주세요. 최대 20MB까지 올릴 수 있어요.');
+export async function publishMedia(file, kind, token, onStatus) {
+  const image = kind === 'image';
+  const extension = file.name.match(image ? /\.(jpe?g|png|webp|gif|avif)$/i : extensions)?.[0].toLowerCase();
+  if (!extension || !file.size || file.size > (image ? 5 * 1024 * 1024 : maxBytes)) {
+    throw new Error(image ? 'JPG, PNG, WebP, GIF, AVIF 이미지를 선택해 주세요. 최대 5MB예요.' : '지원하는 오디오 파일을 선택해 주세요. 최대 20MB까지 올릴 수 있어요.');
   }
 
   onStatus('파일을 확인하는 중이에요.');
@@ -23,17 +24,17 @@ export async function publishAudio(file, token, onStatus) {
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
   const hash = Array.from(digest, byte => byte.toString(16).padStart(2, '0')).join('');
   const path = `media/${hash}${extension}`;
-  const audio = new URL(path, pages);
+  const url = new URL(path, pages);
   const endpoint = repository + path;
   const isPublished = () => {
-    const probe = new URL(audio);
+    const probe = new URL(url);
     probe.searchParams.set('check', Date.now());
     return fetch(probe, { method: 'HEAD', cache: 'no-store', signal: AbortSignal.timeout(6000) })
       .then(response => response.ok, () => false);
   };
-  if (await isPublished()) return { audio, ready: true };
+  if (await isPublished()) return { url, ready: true };
 
-  onStatus('GitHub에 오디오를 업로드하는 중이에요.');
+  onStatus(image ? 'GitHub에 이미지를 업로드하는 중이에요.' : 'GitHub에 오디오를 업로드하는 중이에요.');
   const response = await fetch(endpoint, {
     method: 'PUT',
     redirect: 'error',
@@ -42,7 +43,7 @@ export async function publishAudio(file, token, onStatus) {
       Accept: 'application/vnd.github+json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ message: 'Add player audio', content: await encodeFile(file), branch: 'main' }),
+    body: JSON.stringify({ message: image ? 'Add player artwork' : 'Add player audio', content: await encodeFile(file), branch: 'main' }),
     signal: AbortSignal.timeout(60000),
   });
   if (!response.ok) {
@@ -60,9 +61,9 @@ export async function publishAudio(file, token, onStatus) {
 
   onStatus('업로드 완료. 공개 재생 주소가 열리기를 기다리는 중이에요.');
   for (let attempt = 0; attempt < 12; attempt++) {
-    if (await isPublished()) return { audio, ready: true };
+    if (await isPublished()) return { url, ready: true };
     await new Promise(resolve => setTimeout(resolve, 5000));
   }
 
-  return { audio, ready: false };
+  return { url, ready: false };
 }

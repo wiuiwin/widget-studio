@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CD·LP 플레이어 — 위젯 스튜디오</title>
-  <link rel="stylesheet" href="../css/home.css?v=14">
-  <link rel="stylesheet" href="../css/player.css?v=2">
+  <link rel="stylesheet" href="../css/home.css?v=15">
+  <link rel="stylesheet" href="../css/player.css?v=3">
 </head>
 <body>
   <header class="top"><a class="brand" href="../">← 위젯 스튜디오</a></header>
@@ -16,14 +16,13 @@
         <label>플레이어<select name="type"><option value="lp">LP</option><option value="cd">CD</option></select></label>
         <label>오디오 파일<input name="audio" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.opus,.flac" required></label>
         <label>원판 이미지<select name="artwork"><option value="cover">음악 커버 자동 표시</option><option value="custom">커스텀 이미지</option></select></label>
-        <label id="image-field" hidden>이미지 파일 주소<input name="image" type="url" placeholder="https://…/cover.jpg"></label>
+        <label id="image-field" hidden>이미지 파일<input name="image" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.avif"></label>
         <p>MP3에 앨범 커버가 들어 있으면 원판에 표시돼요.</p>
-        <button type="submit">미리보기 적용</button>
       </form>
-      <form id="player-publish" class="player-link" autocomplete="off">
+      <form id="player-publish" class="player-link" autocomplete="off" hidden>
         <label>GitHub 업로드 키<input id="github-token" type="password" autocomplete="off" placeholder="공개 업로드에만 필요" required></label>
         <p><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">GitHub에서 키 만들기</a> · <code>widget-studio</code> 저장소에만 <code>Contents: Read and write</code> 권한을 주세요.</p>
-        <p>업로드한 오디오는 공개 저장소에 저장돼요. 공개해도 되는 파일만 올려 주세요.</p>
+        <p>오디오(최대 20MB)와 이미지(최대 5MB)는 공개 저장소에 올라가요.</p>
         <button id="player-upload" type="submit">GitHub에 업로드</button>
       </form>
       <label class="player-link">노션 임베드 링크<input id="player-link" readonly placeholder="업로드 후 링크가 생성돼요"></label>
@@ -32,6 +31,6 @@
     </section>
     <iframe id="player-preview" title="플레이어 미리보기" src="../widgets/player.html"></iframe>
   </main>
-  <script type="module" src="../js/player-editor.js?v=2"></script>
+  <script type="module" src="../js/player-editor.js?v=3"></script>
 </body>
 </html>

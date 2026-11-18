@@ -5,7 +5,8 @@
 - 홈: `index.html` — 위젯 목록
 - 에디터: `clock/`, `timer/`, `weather/`(날씨·온도·습도·미세먼지, `?kind=`) — 모두 `js/editor.js` 의 `initEditor` 공유
 - 임베드: `widgets/clock.html?…`, `widgets/timer.html?…`, `widgets/weather.html?…`
-- CD·LP 플레이어: `player/`에서 오디오 파일을 선택해 미리 듣고, GitHub 키를 입력해 공개 저장소의 `media/`에 올린 뒤 노션 링크를 복사합니다. 키는 `widget-studio` 저장소의 Contents 읽기·쓰기 권한만 지정하고, 페이지에 저장하지 않습니다. 최대 20MB이며 MP3 내장 커버 또는 공개 이미지 URL을 사용할 수 있습니다.
+- CD·LP 플레이어: `player/`에서 오디오(최대 20MB)와 커스텀 이미지(최대 5MB)를 선택해 미리 보고, GitHub 키로 공개 저장소의 `media/`에 올린 뒤 노션 링크를 복사합니다. 키에는 `widget-studio` 저장소의 Contents 읽기·쓰기 권한만 지정합니다. 커스텀 이미지를 선택하지 않으면 지원되는 MP3의 내장 커버를 표시합니다.
+- 임베드 위젯 위에 마우스를 올려 **위젯 수정**을 누르면 현재 설정을 이어서 편집할 수 있습니다. 복사한 새 링크로 노션의 임베드 주소를 교체합니다.
 - 날씨 데이터: Open-Meteo (무료·키 없음, 15분 캐시). 미세먼지는 Open-Meteo 대기질 모델(예측값) — 설정은 전부 URL 쿼리로 받음 (노션에 붙은 주소라 경로를 바꾸지 않는다)
 - 순수 HTML/CSS/JS, 빌드 없음
 
