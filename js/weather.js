@@ -1,7 +1,7 @@
 // 날씨·온도·습도·미세먼지 위젯 — 데이터는 Open-Meteo (무료, 키 없음)
 // 디자인 공통 요소(테마·폰트·크기·그림자·다크모드·워터마크)는 시계와 같다.
-import { DEFAULTS as CLOCK_DEFAULTS, ensureFont, fontStack, SIZE_SCALE, watermark, resolveColors } from './clock.js?v=16';
-export { fromQuery } from './clock.js?v=16';
+import { DEFAULTS as CLOCK_DEFAULTS, ensureFont, fontStack, SIZE_SCALE, watermark, resolveColors } from './clock.js?v=17';
+export { fromQuery } from './clock.js?v=17';
 
 export const WEATHER_DEFAULTS = {
   ...CLOCK_DEFAULTS,
@@ -38,42 +38,56 @@ export const CITIES = {
 
 // ── 데이터 ─────────────────────────────────────
 const TTL = 15 * 60 * 1000; // 15분 — 노션에 여러 개 붙여도 API 를 아끼도록 캐시
+const STALE_LIMIT = 24 * 60 * 60 * 1000;
+const REQUEST_TIMEOUT = 4500;
 const mem = new Map();
+const pending = new Map();
 
-async function cached(key, url) {
+function savedForecast(key) {
   const hit = mem.get(key);
-  if (hit && Date.now() - hit.t < TTL) return hit.data;
+  if (hit && Date.now() - hit.t < STALE_LIMIT) return hit;
   try {
     const s = JSON.parse(localStorage.getItem(key));
-    if (s && Date.now() - s.t < TTL) { mem.set(key, s); return s.data; }
+    if (s?.data && Date.now() - s.t < STALE_LIMIT) { mem.set(key, s); return s; }
   } catch { /* 저장소 막힘 */ }
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  const entry = { t: Date.now(), data };
-  mem.set(key, entry);
-  try { localStorage.setItem(key, JSON.stringify(entry)); } catch { /* 무시 */ }
-  return data;
+}
+
+function fetchForecast(key, url) {
+  if (pending.has(key)) return pending.get(key);
+  const request = (async () => {
+    const res = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.current || (key.startsWith('ws-wx-') && !data.daily?.time?.length)) {
+      throw new Error('Missing weather data');
+    }
+    const entry = { t: Date.now(), data };
+    mem.set(key, entry);
+    try { localStorage.setItem(key, JSON.stringify(entry)); } catch { /* 저장소 막힘 */ }
+    return data;
+  })().finally(() => pending.delete(key));
+  pending.set(key, request);
+  return request;
 }
 
 function coords(opts) {
   return CITIES[opts.city] || CITIES.서울;
 }
 
-async function loadWeather(opts) {
+function weatherSource(opts) {
   const [lat, lon] = coords(opts);
   // models 를 지정하지 않으면 Open-Meteo 가 지역에 가장 맞는 모델을 고른다
   // (기상청 KMA 모델 kma_seamless 는 2026-10 기준 값이 비어 와서 기본값 사용)
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&timezone=auto`
     + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,is_day'
     + '&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=8';
-  return cached(`ws-wx-8:${lat},${lon}`, url);
+  return { key: `ws-wx-8:${lat},${lon}`, url };
 }
 
-async function loadDust(opts) {
+function dustSource(opts) {
   const [lat, lon] = coords(opts);
   const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&timezone=auto&current=pm10,pm2_5`;
-  return cached(`ws-aq:${lat},${lon}`, url);
+  return { key: `ws-aq:${lat},${lon}`, url };
 }
 
 // ── 날씨 코드(WMO) → 한국어·아이콘 ───────────────
@@ -226,6 +240,7 @@ export function createWeather(root, initial = {}) {
     card.className = 'wx-card';
     card.innerHTML = view
       ? view.html + (opts.label ? `<div class="wx-label">${esc(opts.label)}</div>` : '')
+        + (msg ? `<div class="wx-label">${msg}</div>` : '')
       : `<div class="wx-msg">${msg}</div>`;
     face.append(card);
     if (opts.wm) face.append(watermark());
@@ -246,19 +261,32 @@ export function createWeather(root, initial = {}) {
 
   async function load() {
     const my = ++seq;
+    const { key, url } = opts.kind === 'dust' ? dustSource(opts) : weatherSource(opts);
+    const saved = savedForecast(key);
+    const show = (data, message) => paint(VIEWS[opts.kind](opts, data), message);
+    let showingSaved = false;
     try {
-      const data = opts.kind === 'dust' ? await loadDust(opts) : await loadWeather(opts);
+      if (saved) {
+        const fresh = Date.now() - saved.t < TTL;
+        show(saved.data, fresh ? '' : '저장된 날씨 · 갱신 중');
+        showingSaved = true;
+        if (fresh) return;
+      } else {
+        paint(null, '불러오는 중…');
+      }
+      const data = await fetchForecast(key, url);
       if (my !== seq) return; // 그사이 설정이 바뀜
-      paint(VIEWS[opts.kind](opts, data));
+      show(data);
     } catch {
-      if (my === seq) paint(null, '날씨 정보를 불러오지 못했어요');
+      if (my !== seq) return;
+      if (showingSaved) show(saved.data, '저장된 날씨 · 갱신 지연');
+      else paint(null, '날씨 응답이 지연돼요. 잠시 후 새로고침해 주세요.');
     }
   }
 
   function build() {
     clearInterval(timer);
     frame();
-    if (!root.firstChild) paint(null, '불러오는 중…');
     load();
     timer = setInterval(load, TTL);
   }
@@ -270,6 +298,6 @@ export function createWeather(root, initial = {}) {
   return {
     get options() { return { ...opts }; },
     update(next) { opts = { ...opts, ...next }; build(); },
-    destroy() { clearInterval(timer); darkMQ?.removeEventListener('change', onScheme); root.replaceChildren(); },
+    destroy() { seq++; clearInterval(timer); darkMQ?.removeEventListener('change', onScheme); root.replaceChildren(); },
   };
 }

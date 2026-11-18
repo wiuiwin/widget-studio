@@ -1,4 +1,4 @@
-import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, fromQuery, toQuery } from './clock.js?v=16';
+import { createClock, DEFAULTS, THEMES, TYPES, FONTS, fontStack, ensureFont, fromQuery, toQuery } from './clock.js?v=17';
 
 // 노션에 붙일 공개 주소 (GitHub Pages)
 const PUBLIC_URL = 'https://wiuiwin.github.io/widget-studio/';
