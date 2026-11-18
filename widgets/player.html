@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CD·LP 플레이어</title>
+  <link rel="stylesheet" href="../css/player.css?v=1">
+</head>
+<body class="player-embed">
+  <main class="deck" data-type="lp" aria-label="음악 플레이어">
+    <i class="screw top-left"></i><i class="screw top-right"></i>
+    <i class="screw bottom-left"></i><i class="screw bottom-right"></i>
+    <div class="disc"><img class="disc-art" alt="" hidden></div>
+    <div class="tonearm" aria-hidden="true"><i></i></div>
+    <div class="deck-controls">
+      <button id="play" aria-label="재생" disabled>▶</button>
+      <input id="seek" type="range" min="0" max="1000" value="0" aria-label="재생 위치" disabled>
+      <span id="time">0:00</span>
+    </div>
+    <p id="media-status" role="status"></p>
+    <audio id="music" preload="metadata"></audio>
+  </main>
+  <script type="module" src="../js/player.js?v=1"></script>
+</body>
+</html>
